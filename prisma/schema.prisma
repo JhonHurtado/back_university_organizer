@@ -1,0 +1,947 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// CLIENTES API (para integraciones externas)
+// =====================================================
+
+model ApiClient {
+  id           String          @id @default(uuid()) @db.Uuid
+  clientId     String          @unique @map("client_id")
+  clientSecret String          @map("client_secret")
+  name         String
+  description  String?
+  status       ApiClientStatus @default(ACTIVE)
+  scopes       String[]        @default([])
+  rateLimit    Int             @default(1000) @map("rate_limit")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  state        String?         @default("A") @map("state")
+
+  @@map("api_clients")
+}
+
+enum ApiClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// =====================================================
+// USUARIOS Y AUTENTICACIÓN
+// =====================================================
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  password        String? // Nullable para OAuth users
+  firstName       String    @map("first_name")
+  lastName        String    @map("last_name")
+  phone           String?
+  avatar          String?
+  timezone        String    @default("America/Bogota")
+  language        String    @default("es")
+  isActive        Boolean   @default(true) @map("is_active")
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  state String? @default("A") @map("state")
+
+  // Relaciones
+  accounts           Account[]
+  sessions           Session[]
+  subscription       Subscription?
+  careers            Career[]
+  notifications      Notification[]
+  preferences        UserPreference?
+  activityLogs       ActivityLog[]
+  verificationTokens VerificationToken[]
+
+  @@index([email])
+  @@index([isActive])
+  @@map("users")
+}
+
+// Cuentas OAuth (Google, GitHub, etc.)
+model Account {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  provider          String // google, github, email
+  providerAccountId String   @map("provider_account_id")
+  type              String   @default("oauth") // oauth, credentials
+  accessToken       String?  @map("access_token") @db.Text
+  refreshToken      String?  @map("refresh_token") @db.Text
+  expiresAt         Int?     @map("expires_at")
+  tokenType         String?  @map("token_type")
+  scope             String?
+  idToken           String?  @map("id_token") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  state String? @default("A") @map("state")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  token        String   @unique
+  refreshToken String?  @unique @map("refresh_token")
+  expiresAt    DateTime @map("expires_at")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  deviceType   String?  @map("device_type")
+  isValid      Boolean  @default(true) @map("is_valid")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  state String? @default("A") @map("state")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  state String? @default("A") @map("state")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId, type])
+  @@map("verification_tokens")
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  TWO_FACTOR
+}
+
+model UserPreference {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+
+  // Notificaciones
+  emailNotifications    Boolean @default(true) @map("email_notifications")
+  pushNotifications     Boolean @default(true) @map("push_notifications")
+  gradeAlerts           Boolean @default(true) @map("grade_alerts")
+  scheduleReminders     Boolean @default(true) @map("schedule_reminders")
+  reminderMinutesBefore Int     @default(30) @map("reminder_minutes_before")
+
+  // Visualización
+  darkMode     Boolean @default(false) @map("dark_mode")
+  compactView  Boolean @default(false) @map("compact_view")
+  weekStartsOn Int     @default(1) @map("week_starts_on")
+
+  // Académico
+  gradeScale GradeScale @default(FIVE) @map("grade_scale")
+  showGPA    Boolean    @default(true) @map("show_gpa")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+enum GradeScale {
+  FIVE // 0-5 (Colombia, México)
+  TEN // 0-10 (Argentina, España)
+  HUNDRED // 0-100 (USA porcentaje)
+  FOUR_GPA // 0-4 GPA (USA)
+  SEVEN // 1-7 (Chile)
+}
+
+// =====================================================
+// SUSCRIPCIONES Y PLANES
+// =====================================================
+
+model Plan {
+  id            String        @id @default(uuid()) @db.Uuid
+  name          String        @unique
+  slug          String        @unique
+  description   String?
+  price         Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  billingPeriod BillingPeriod @default(MONTHLY) @map("billing_period")
+  trialDays     Int           @default(0) @map("trial_days")
+
+  // Límites
+  maxCareers           Int @default(1) @map("max_careers")
+  maxSubjectsPerCareer Int @default(50) @map("max_subjects_per_career")
+  maxScheduleExports   Int @default(5) @map("max_schedule_exports")
+
+  // Características
+  features       Json
+  canExportPDF   Boolean @default(false) @map("can_export_pdf")
+  canExportExcel Boolean @default(false) @map("can_export_excel")
+  hasAnalytics   Boolean @default(false) @map("has_analytics")
+  hasReminders   Boolean @default(true) @map("has_reminders")
+  hasBackup      Boolean @default(false) @map("has_backup")
+  priority       Int     @default(0)
+
+  isActive  Boolean @default(true) @map("is_active")
+  isPopular Boolean @default(false) @map("is_popular")
+  sortOrder Int     @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  subscriptions Subscription[]
+  menuAccess    PlanMenuAccess[]
+  featureAccess PlanFeatureAccess[]
+
+  @@map("plans")
+}
+
+enum BillingPeriod {
+  MONTHLY
+  QUARTERLY
+  SEMI_ANNUAL
+  ANNUAL
+  LIFETIME
+}
+
+model Feature {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique
+  name        String
+  description String?
+  category    String
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  state       String?  @default("A") @map("state")
+
+  planAccess PlanFeatureAccess[]
+
+  @@map("features")
+}
+
+model PlanFeatureAccess {
+  id        String  @id @default(uuid()) @db.Uuid
+  planId    String  @map("plan_id") @db.Uuid
+  featureId String  @map("feature_id") @db.Uuid
+  limit     Int?
+  state     String? @default("A") @map("state")
+
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature Feature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureId])
+  @@map("plan_feature_access")
+}
+
+model Subscription {
+  id                 String             @id @default(uuid()) @db.Uuid
+  userId             String             @unique @map("user_id") @db.Uuid
+  planId             String             @map("plan_id") @db.Uuid
+  status             SubscriptionStatus @default(ACTIVE)
+  startDate          DateTime           @map("start_date")
+  endDate            DateTime           @map("end_date")
+  trialEndsAt        DateTime?          @map("trial_ends_at")
+  cancelledAt        DateTime?          @map("cancelled_at")
+  cancellationReason String?            @map("cancellation_reason")
+  autoRenew          Boolean            @default(true) @map("auto_renew")
+
+  externalId      String?   @unique @map("external_id")
+  paymentMethod   String?   @map("payment_method")
+  lastPaymentDate DateTime? @map("last_payment_date")
+  nextBillingDate DateTime? @map("next_billing_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  payments Payment[]
+  invoices Invoice[]
+
+  @@index([status])
+  @@index([endDate])
+  @@map("subscriptions")
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+model Payment {
+  id             String        @id @default(uuid()) @db.Uuid
+  subscriptionId String        @map("subscription_id") @db.Uuid
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  status         PaymentStatus @default(PENDING)
+  method         PaymentMethod
+  transactionId  String?       @unique @map("transaction_id")
+  externalId     String?       @map("external_id")
+  failureReason  String?       @map("failure_reason")
+  metadata       Json?
+  paidAt         DateTime?     @map("paid_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  state          String?       @default("A") @map("state")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([subscriptionId])
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  DISPUTED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  BANK_TRANSFER
+  CRYPTO
+  OTHER
+}
+
+model Invoice {
+  id             String        @id @default(uuid()) @db.Uuid
+  subscriptionId String        @map("subscription_id") @db.Uuid
+  invoiceNumber  String        @unique @map("invoice_number")
+  amount         Decimal       @db.Decimal(10, 2)
+  tax            Decimal       @default(0) @db.Decimal(10, 2)
+  total          Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  status         InvoiceStatus @default(DRAFT)
+  dueDate        DateTime      @map("due_date")
+  paidAt         DateTime?     @map("paid_at")
+  pdfUrl         String?       @map("pdf_url")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  state          String?       @default("A") @map("state")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// =====================================================
+// SISTEMA DE MENÚS DINÁMICO
+// =====================================================
+
+model Menu {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  label       String
+  labelKey    String? @map("label_key")
+  icon        String?
+  path        String?
+  externalUrl String? @map("external_url")
+  target      String? @default("_self")
+  parentId    String? @map("parent_id") @db.Uuid
+  sortOrder   Int     @default(0) @map("sort_order")
+  isActive    Boolean @default(true) @map("is_active")
+  isPremium   Boolean @default(false) @map("is_premium")
+  badge       String?
+  badgeColor  String? @map("badge_color")
+  state       String? @default("A") @map("state")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent     Menu?            @relation("MenuHierarchy", fields: [parentId], references: [id])
+  children   Menu[]           @relation("MenuHierarchy")
+  planAccess PlanMenuAccess[]
+
+  @@unique([name])
+  @@index([parentId])
+  @@index([isActive])
+  @@map("menus")
+}
+
+model PlanMenuAccess {
+  id        String  @id @default(uuid()) @db.Uuid
+  planId    String  @map("plan_id") @db.Uuid
+  menuId    String  @map("menu_id") @db.Uuid
+  canView   Boolean @default(true) @map("can_view")
+  canCreate Boolean @default(false) @map("can_create")
+  canEdit   Boolean @default(false) @map("can_edit")
+  canDelete Boolean @default(false) @map("can_delete")
+  canExport Boolean @default(false) @map("can_export")
+  state     String? @default("A") @map("state")
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, menuId])
+  @@map("plan_menu_access")
+}
+
+// =====================================================
+// GESTIÓN ACADÉMICA - CARRERA Y PENSUM
+// =====================================================
+
+model Career {
+  id         String  @id @default(uuid()) @db.Uuid
+  userId     String  @map("user_id") @db.Uuid
+  name       String
+  code       String?
+  university String
+  faculty    String?
+  campus     String?
+
+  totalCredits    Int @map("total_credits")
+  totalSemesters  Int @map("total_semesters")
+  currentSemester Int @default(1) @map("current_semester")
+
+  gradeScale      GradeScale @default(FIVE) @map("grade_scale")
+  minPassingGrade Decimal    @default(3.0) @map("min_passing_grade") @db.Decimal(4, 2)
+  maxGrade        Decimal    @default(5.0) @map("max_grade") @db.Decimal(4, 2)
+
+  startDate       DateTime  @map("start_date")
+  expectedEndDate DateTime? @map("expected_end_date")
+  actualEndDate   DateTime? @map("actual_end_date")
+
+  status CareerStatus @default(ACTIVE)
+  color  String?      @default("#3B82F6")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  state     String?   @default("A") @map("state")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  semesters       Semester[]
+  subjects        Subject[]
+  academicPeriods AcademicPeriod[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("careers")
+}
+
+enum CareerStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  CANCELLED
+  GRADUATED
+}
+
+model AcademicPeriod {
+  id        String   @id @default(uuid()) @db.Uuid
+  careerId  String   @map("career_id") @db.Uuid
+  name      String
+  year      Int
+  period    Int
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  isCurrent Boolean  @default(false) @map("is_current")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  career             Career              @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  subjectEnrollments SubjectEnrollment[]
+
+  @@unique([careerId, year, period])
+  @@index([careerId])
+  @@index([isCurrent])
+  @@map("academic_periods")
+}
+
+model Semester {
+  id         String  @id @default(uuid()) @db.Uuid
+  careerId   String  @map("career_id") @db.Uuid
+  number     Int
+  name       String?
+  minCredits Int?    @map("min_credits")
+  maxCredits Int?    @map("max_credits")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  career   Career    @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  subjects Subject[]
+
+  @@unique([careerId, number])
+  @@index([careerId])
+  @@map("semesters")
+}
+
+// =====================================================
+// MATERIAS Y PENSUM
+// =====================================================
+
+model Subject {
+  id         String @id @default(uuid()) @db.Uuid
+  careerId   String @map("career_id") @db.Uuid
+  semesterId String @map("semester_id") @db.Uuid
+
+  code         String
+  name         String
+  description  String?
+  credits      Int
+  hoursPerWeek Int?        @map("hours_per_week")
+  subjectType  SubjectType @default(REQUIRED) @map("subject_type")
+  area         String?
+
+  gradeWeights Json? @map("grade_weights")
+  totalCuts    Int   @default(3) @map("total_cuts")
+
+  isElective Boolean @default(false) @map("is_elective")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  state     String?   @default("A") @map("state")
+
+  career   Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  semester Semester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+
+  prerequisites SubjectPrerequisite[] @relation("SubjectPrerequisites")
+  requiredFor   SubjectPrerequisite[] @relation("RequiredForSubjects")
+  corequisites  SubjectCorequisite[]  @relation("SubjectCorequisites")
+  corequisiteOf SubjectCorequisite[]  @relation("CorequisiteOfSubjects")
+
+  enrollments SubjectEnrollment[]
+
+  @@unique([careerId, code])
+  @@index([careerId])
+  @@index([semesterId])
+  @@map("subjects")
+}
+
+enum SubjectType {
+  REQUIRED
+  ELECTIVE
+  FREE_ELECTIVE
+  COMPLEMENTARY
+}
+
+model SubjectPrerequisite {
+  id             String  @id @default(uuid()) @db.Uuid
+  subjectId      String  @map("subject_id") @db.Uuid
+  prerequisiteId String  @map("prerequisite_id") @db.Uuid
+  isStrict       Boolean @default(true) @map("is_strict")
+  state          String? @default("A") @map("state")
+
+  subject      Subject @relation("SubjectPrerequisites", fields: [subjectId], references: [id], onDelete: Cascade)
+  prerequisite Subject @relation("RequiredForSubjects", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@unique([subjectId, prerequisiteId])
+  @@map("subject_prerequisites")
+}
+
+model SubjectCorequisite {
+  id            String  @id @default(uuid()) @db.Uuid
+  subjectId     String  @map("subject_id") @db.Uuid
+  corequisiteId String  @map("corequisite_id") @db.Uuid
+  state         String? @default("A") @map("state")
+
+  subject     Subject @relation("SubjectCorequisites", fields: [subjectId], references: [id], onDelete: Cascade)
+  corequisite Subject @relation("CorequisiteOfSubjects", fields: [corequisiteId], references: [id], onDelete: Cascade)
+
+  @@unique([subjectId, corequisiteId])
+  @@map("subject_corequisites")
+}
+
+// =====================================================
+// INSCRIPCIÓN Y NOTAS
+// =====================================================
+
+model SubjectEnrollment {
+  id               String @id @default(uuid()) @db.Uuid
+  subjectId        String @map("subject_id") @db.Uuid
+  academicPeriodId String @map("academic_period_id") @db.Uuid
+
+  status  EnrollmentStatus @default(ENROLLED)
+  attempt Int              @default(1)
+
+  section   String?
+  classroom String?
+
+  finalGrade  Decimal? @map("final_grade") @db.Decimal(4, 2)
+  letterGrade String?  @map("letter_grade")
+  gradePoints Decimal? @map("grade_points") @db.Decimal(4, 2)
+  isPassed    Boolean? @map("is_passed")
+
+  enrolledAt  DateTime  @default(now()) @map("enrolled_at")
+  withdrawnAt DateTime? @map("withdrawn_at")
+  completedAt DateTime? @map("completed_at")
+
+  notes String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  subject        Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  academicPeriod AcademicPeriod @relation(fields: [academicPeriodId], references: [id], onDelete: Cascade)
+
+  grades     Grade[]
+  schedules  Schedule[]
+  professors EnrollmentProfessor[]
+
+  @@unique([subjectId, academicPeriodId, attempt])
+  @@index([subjectId])
+  @@index([academicPeriodId])
+  @@index([status])
+  @@map("subject_enrollments")
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+  PASSED
+  FAILED
+  WITHDRAWN
+  CANCELLED
+}
+
+model EnrollmentProfessor {
+  id           String  @id @default(uuid()) @db.Uuid
+  enrollmentId String  @map("enrollment_id") @db.Uuid
+  professorId  String  @map("professor_id") @db.Uuid
+  role         String  @default("main")
+  state        String? @default("A") @map("state")
+
+  enrollment SubjectEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  professor  Professor         @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, professorId])
+  @@map("enrollment_professors")
+}
+
+model Professor {
+  id         String  @id @default(uuid()) @db.Uuid
+  firstName  String  @map("first_name")
+  lastName   String  @map("last_name")
+  email      String?
+  phone      String?
+  office     String?
+  department String?
+  title      String?
+  notes      String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  enrollments EnrollmentProfessor[]
+
+  @@index([lastName])
+  @@map("professors")
+}
+
+// =====================================================
+// SISTEMA DE NOTAS POR CORTES
+// =====================================================
+
+model Grade {
+  id           String @id @default(uuid()) @db.Uuid
+  enrollmentId String @map("enrollment_id") @db.Uuid
+
+  cutNumber Int     @map("cut_number")
+  cutName   String? @map("cut_name")
+
+  weight   Decimal @db.Decimal(5, 2)
+  grade    Decimal @db.Decimal(4, 2)
+  maxGrade Decimal @default(5.0) @map("max_grade") @db.Decimal(4, 2)
+
+  weightedGrade Decimal? @map("weighted_grade") @db.Decimal(6, 4)
+
+  description String?
+  notes       String?
+  gradedAt    DateTime @default(now()) @map("graded_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  enrollment SubjectEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  gradeItems GradeItem[]
+
+  @@unique([enrollmentId, cutNumber])
+  @@index([enrollmentId])
+  @@map("grades")
+}
+
+model GradeItem {
+  id      String @id @default(uuid()) @db.Uuid
+  gradeId String @map("grade_id") @db.Uuid
+
+  name     String
+  type     GradeItemType
+  weight   Decimal       @db.Decimal(5, 2)
+  grade    Decimal       @db.Decimal(4, 2)
+  maxGrade Decimal       @default(5.0) @map("max_grade") @db.Decimal(4, 2)
+
+  dueDate     DateTime? @map("due_date")
+  submittedAt DateTime? @map("submitted_at")
+
+  notes String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  gradeRecord Grade @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+
+  @@index([gradeId])
+  @@map("grade_items")
+}
+
+enum GradeItemType {
+  EXAM
+  QUIZ
+  ASSIGNMENT
+  PROJECT
+  LAB
+  PRESENTATION
+  PARTICIPATION
+  OTHER
+}
+
+// =====================================================
+// HORARIOS
+// =====================================================
+
+model Schedule {
+  id           String @id @default(uuid()) @db.Uuid
+  enrollmentId String @map("enrollment_id") @db.Uuid
+
+  dayOfWeek Int    @map("day_of_week")
+  startTime String @map("start_time")
+  endTime   String @map("end_time")
+
+  room     String?
+  building String?
+  type     ScheduleType @default(CLASS)
+
+  color String? @default("#3B82F6")
+  notes String?
+
+  isRecurring Boolean   @default(true) @map("is_recurring")
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  enrollment SubjectEnrollment   @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  exceptions ScheduleException[]
+
+  @@index([enrollmentId])
+  @@index([dayOfWeek])
+  @@map("schedules")
+}
+
+enum ScheduleType {
+  CLASS
+  LAB
+  TUTORIAL
+  OFFICE_HOURS
+  EXAM
+  OTHER
+}
+
+model ScheduleException {
+  id         String        @id @default(uuid()) @db.Uuid
+  scheduleId String        @map("schedule_id") @db.Uuid
+  date       DateTime      @db.Date
+  type       ExceptionType
+
+  newStartTime String? @map("new_start_time")
+  newEndTime   String? @map("new_end_time")
+  newRoom      String? @map("new_room")
+
+  reason String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  state     String?  @default("A") @map("state")
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, date])
+  @@map("schedule_exceptions")
+}
+
+enum ExceptionType {
+  CANCELLED
+  RESCHEDULED
+  ROOM_CHANGE
+  HOLIDAY
+}
+
+model CalendarEvent {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  title       String
+  description String?
+  type        EventType
+
+  startDateTime DateTime @map("start_date_time")
+  endDateTime   DateTime @map("end_date_time")
+  isAllDay      Boolean  @default(false) @map("is_all_day")
+
+  location String?
+  color    String? @default("#10B981")
+
+  isRecurring    Boolean @default(false) @map("is_recurring")
+  recurrenceRule String? @map("recurrence_rule")
+
+  reminderMinutes Int? @map("reminder_minutes")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  state     String?  @default("A") @map("state")
+
+  @@index([userId])
+  @@index([startDateTime])
+  @@map("calendar_events")
+}
+
+enum EventType {
+  EXAM
+  ASSIGNMENT_DUE
+  PROJECT_DUE
+  MEETING
+  STUDY_SESSION
+  PERSONAL
+  REMINDER
+  OTHER
+}
+
+// =====================================================
+// NOTIFICACIONES
+// =====================================================
+
+model Notification {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  title    String
+  message  String
+  type     NotificationType     @default(INFO)
+  category NotificationCategory @default(SYSTEM)
+
+  isRead Boolean   @default(false) @map("is_read")
+  readAt DateTime? @map("read_at")
+
+  actionUrl   String? @map("action_url")
+  actionLabel String? @map("action_label")
+
+  metadata Json?
+  imageUrl String? @map("image_url")
+
+  expiresAt DateTime? @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  state     String?   @default("A") @map("state")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum NotificationCategory {
+  SYSTEM
+  ACADEMIC
+  GRADE
+  SCHEDULE
+  PAYMENT
+  SUBSCRIPTION
+  REMINDER
+}
+
+// =====================================================
+// LOGS Y AUDITORÍA
+// =====================================================
+
+model ActivityLog {
+  id     String  @id @default(uuid()) @db.Uuid
+  userId String? @map("user_id") @db.Uuid
+
+  action   String
+  entity   String
+  entityId String? @map("entity_id")
+
+  oldValues Json? @map("old_values")
+  newValues Json? @map("new_values")
+
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  state     String?  @default("A") @map("state")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
