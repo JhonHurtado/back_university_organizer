@@ -12,7 +12,6 @@ export const ENV: EnvConfig = {
   OAUTH_CLIENT_SECRET_CUSTOMER: process.env.OAUTH_CLIENT_SECRET_CUSTOMER || "",
 
   TOKEN_EXPIRATION: process.env.TOKEN_EXPIRATION || "",
-  SESSION_SECRET: process.env.SESSION_SECRET || "",
   DATABASE_URL: process.env.DATABASE_URL || "",
   NODE_ENV: process.env.NODE_ENV || "development",
   CAPTCHA_SECRET_KEY: process.env.CAPTCHA_SECRET_KEY || "",
@@ -45,7 +44,14 @@ export const ENV: EnvConfig = {
   JWT_ISSUER: process.env.JWT_ISSUER || "your-app-name",
 
 
+
+
+
+
+
+  //=======================================================================
   FRONTEND_URL: process.env.FRONTEND_URL || "",
   API_URL: process.env.API_URL || "",
+  SESSION_SECRET: process.env.SESSION_SECRET || "default_secret",
 
 };
