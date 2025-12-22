@@ -1,7 +1,7 @@
 # 🗺️ Roadmap de Implementación - University Organizer Backend
 
-**Última actualización:** 2025-12-21
-**Estado:** TIER 2 COMPLETADO (100%) - Sistema Core Funcional ✅
+**Última actualización:** 2025-12-22
+**Estado:** TIER 2 COMPLETADO (100%) - Iniciando TIER 3 ✅
 
 ---
 
@@ -9,15 +9,15 @@
 
 ```
 Total de módulos: 13
-Completados: 7 (54%)
+Completados: 8 (62%)
 En progreso: 0 (0%)
-Pendientes: 6 (46%)
+Pendientes: 5 (38%)
 ```
 
 ### Progreso por Prioridad
 - 🔴 **TIER 1 (CRÍTICO):** 4/4 completado (100%) ✅ **MVP COMPLETO**
 - 🟡 **TIER 2 (IMPORTANTE):** 3/3 completado (100%) ✅ **FUNCIONALIDAD PRINCIPAL COMPLETA**
-- 🟢 **TIER 3 (MODERADA):** 0/3 completado (0%)
+- 🟢 **TIER 3 (MODERADA):** 1/3 completado (33%) 🔄 **EN PROGRESO**
 - ⚪ **TIER 4 (BAJA):** 0/3 completado (0%)
 
 ---
@@ -248,6 +248,34 @@ Todas las funcionalidades principales del sistema han sido implementadas. El bac
 
 ---
 
+### 🟢 TIER 3 - MODERADA (Mejoras) - 33% ✅
+
+#### 7. Preferences Module ✅
+**Completado:** 2025-12-22
+
+**Implementación:**
+- Controller completo con gestión de preferencias
+- Schemas de validación con Zod
+- Routes protegidas con autenticación
+- CRUD de preferencias de usuario basado en UserPreference
+
+**Funcionalidades:**
+- Obtener preferencias del usuario autenticado
+- Actualizar preferencias generales (todas en una sola llamada)
+- Actualizar preferencias de notificación (email, push, alertas, recordatorios)
+- Actualizar preferencias de visualización (dark mode, compact view, inicio de semana)
+- Actualizar preferencias académicas (escala de calificación, mostrar GPA)
+- Creación automática de preferencias con valores por defecto si no existen
+
+**Endpoints principales:**
+- `GET /preferences` - Obtener preferencias del usuario
+- `PUT /preferences` - Actualizar preferencias generales
+- `PUT /preferences/notifications` - Actualizar preferencias de notificación
+- `PUT /preferences/display` - Actualizar preferencias de visualización
+- `PUT /preferences/academic` - Actualizar preferencias académicas
+
+---
+
 ## 📋 Módulos Pendientes
 
 ### 🟢 TIER 3 - MODERADA (Mejoras)
@@ -271,24 +299,7 @@ Todas las funcionalidades principales del sistema han sido implementadas. El bac
 
 ---
 
-#### 2. Preferences Module
-**Prioridad:** 🟢 MEDIA
-
-**Archivos a crear:**
-- `src/controllers/preferences/preference.controller.ts`
-- `src/routes/preferences/preference.routes.ts`
-
-**Funcionalidades:**
-- Actualizar preferencias de usuario (basado en UserPreference existente)
-- Configurar escala de calificación preferida
-- Configurar notificaciones (email, push, alertas)
-- Configurar tema (dark mode, compact view)
-- Configurar idioma y timezone
-- Configurar inicio de semana (lunes/domingo)
-
----
-
-#### 3. Menu System
+#### 2. Menu System
 **Prioridad:** 🟢 BAJA
 
 **Archivos a crear:**
@@ -369,12 +380,12 @@ Todas las funcionalidades principales del sistema han sido implementadas. El bac
 
 ---
 
-### 🔄 Milestone 3: Refinamiento (EN ESPERA)
+### 🔄 Milestone 3: Refinamiento (EN PROGRESO)
 - [ ] Professors Module
-- [ ] Preferences Module
+- [x] Preferences Module ✅
 - [ ] Menu System
 
-**Estado:** 🔄 PENDIENTE
+**Estado:** 🔄 EN PROGRESO (33%)
 **Objetivo:** Pulir detalles y agregar features secundarias.
 
 ---
@@ -486,10 +497,9 @@ export default router;
 
 ## 🔄 Próximos Pasos
 
-1. **Siguiente:** Professors Module (TIER 3)
-2. **Luego:** Preferences Module (TIER 3)
-3. **Después:** Menu System (TIER 3)
-4. **Finalmente:** Módulos TIER 4 según prioridad de negocio
+1. **Siguiente:** Professors Module (TIER 3) - 🎯 PRIORIDAD ALTA
+2. **Luego:** Menu System (TIER 3)
+3. **Después:** Módulos TIER 4 según prioridad de negocio
 
 ---
 
@@ -530,4 +540,5 @@ export default router;
 ---
 
 **Documento vivo - Se actualiza con cada módulo completado**
+**Última actualización:** 2025-12-22 - Preferences Module completado ✅
 **Próxima revisión:** Después de completar Professors Module
