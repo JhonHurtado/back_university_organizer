@@ -9,7 +9,7 @@ import type {
   UpdateScheduleExceptionInput,
   WeeklyScheduleQueryInput,
 } from "@/types/schemas/schedules/schedule.schemas";
-import type { Schedule, ScheduleException } from "generated/prisma/client";
+import type { Schedule, ScheduleException } from "@prisma/client";
 
 // =====================================================
 // SCHEDULE SERVICE
@@ -18,7 +18,10 @@ class ScheduleService {
   // =====================================================
   // CREATE SCHEDULE
   // =====================================================
-  async createSchedule(userId: string, data: CreateScheduleInput): Promise<Schedule> {
+  async createSchedule(
+    userId: string,
+    data: CreateScheduleInput
+  ): Promise<Schedule> {
     // Verificar que la inscripción existe y pertenece al usuario
     const enrollment = await database.subjectEnrollment.findFirst({
       where: { id: data.enrollmentId },
@@ -297,7 +300,14 @@ class ScheduleService {
         const s2 = schedules[j];
 
         if (s1.dayOfWeek === s2.dayOfWeek) {
-          if (this.timesOverlap(s1.startTime, s1.endTime, s2.startTime, s2.endTime)) {
+          if (
+            this.timesOverlap(
+              s1.startTime,
+              s1.endTime,
+              s2.startTime,
+              s2.endTime
+            )
+          ) {
             conflicts.push({
               schedule1: {
                 id: s1.id,
@@ -474,13 +484,32 @@ class ScheduleService {
     });
 
     for (const schedule of schedules) {
-      if (this.timesOverlap(startTime, endTime, schedule.startTime, schedule.endTime)) {
+      if (
+        this.timesOverlap(
+          startTime,
+          endTime,
+          schedule.startTime,
+          schedule.endTime
+        )
+      ) {
         // Verificar superposición de fechas si aplica
         if (startDate && endDate && schedule.startDate && schedule.endDate) {
-          if (this.datesOverlap(startDate, endDate, schedule.startDate, schedule.endDate)) {
+          if (
+            this.datesOverlap(
+              startDate,
+              endDate,
+              schedule.startDate,
+              schedule.endDate
+            )
+          ) {
             return true;
           }
-        } else if (!startDate && !endDate && !schedule.startDate && !schedule.endDate) {
+        } else if (
+          !startDate &&
+          !endDate &&
+          !schedule.startDate &&
+          !schedule.endDate
+        ) {
           // Ambos son recurrentes sin límite de fecha
           return true;
         }

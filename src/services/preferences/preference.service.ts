@@ -3,7 +3,7 @@
 // =====================================================
 
 import database from "@/lib/prisma/prisma";
-import { GradeScale } from "generated/prisma/enums";
+import { GradeScale } from "@prisma/client";
 
 
 // =====================================================

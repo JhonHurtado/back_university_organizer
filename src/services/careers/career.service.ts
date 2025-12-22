@@ -7,7 +7,7 @@ import type {
   UpdateCareerInput,
   CareerQueryInput,
 } from "@/types/schemas/careers/career.schemas";
-import type { Career } from "generated/prisma/client";
+import type { Career } from "@prisma/client";
 
 // =====================================================
 // CAREER SERVICE

@@ -6,7 +6,7 @@ import type {
   CreateAcademicPeriodInput,
   UpdateAcademicPeriodInput,
 } from "@/types/schemas/academicPeriods/academicPeriod.schemas";
-import type { AcademicPeriod } from "generated/prisma/client";
+import type { AcademicPeriod } from "@prisma/client";
 
 // =====================================================
 // ACADEMIC PERIOD SERVICE

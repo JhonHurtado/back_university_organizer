@@ -468,7 +468,7 @@ export default router;
 
 **Base de Datos:**
 - Importar como `database` (no `prisma`)
-- Tipos desde `generated/prisma/client`
+- Tipos desde `@prisma/client`
 - Soft delete con campo `state` ("A" = activo, "I" = inactivo)
 - Usar transacciones para operaciones múltiples
 

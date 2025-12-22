@@ -8,7 +8,7 @@ import type {
   CreateGradeItemInput,
   UpdateGradeItemInput,
 } from "@/types/schemas/grades/grade.schemas";
-import type { Grade, GradeItem } from "generated/prisma/client";
+import type { Grade, GradeItem } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 
 // =====================================================

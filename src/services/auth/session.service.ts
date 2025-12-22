@@ -8,7 +8,7 @@ import {
   SessionWithUser,
 } from "@/types/schemas/session/session.schema";
 import { randomUUID } from "crypto";
-import type { Session, User } from "generated/prisma/client";
+import type { Session, User } from "@prisma/client";
 
 // =====================================================
 // CONSTANTS

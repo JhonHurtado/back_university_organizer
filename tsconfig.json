@@ -7,10 +7,10 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    
+
     "outDir": "./dist",
     "baseUrl": ".",
-    
+
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -19,29 +19,22 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    
+    "rootDir": ".",
+
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    
+
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "removeComments": true,
-    
+
     "types": ["node"],
-    
+
     "paths": {
-      "@/*": ["./src/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/routes/*": ["./src/routes/*"],
-      "@/controllers/*": ["./src/controllers/*"],
-      "@/middlewares/*": ["./src/middlewares/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/config/*": ["./src/config/*"],
-      "@/services/*": ["./src/services/*"],
-      "@/prisma": ["./generated/prisma"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["index.ts", "src/**/*"],
-  "exclude": ["node_modules", "dist", "generated", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules"]
 }

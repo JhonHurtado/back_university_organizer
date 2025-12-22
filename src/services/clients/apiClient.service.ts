@@ -3,7 +3,7 @@
 // =====================================================
 import database from "@/lib/prisma/prisma";
 import { randomBytes } from "crypto";
-import { ApiClientStatus } from "generated/prisma/enums";
+import { ApiClientStatus } from "@prisma/client";
 
 // =====================================================
 // CREAR CLIENTE API

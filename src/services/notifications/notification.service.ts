@@ -7,7 +7,7 @@ import type {
   UpdateNotificationInput,
   NotificationQueryInput,
 } from "@/types/schemas/notifications/notification.schemas";
-import type { Notification } from "generated/prisma/client";
+import type { Notification } from "@prisma/client";
 
 // =====================================================
 // NOTIFICATION SERVICE

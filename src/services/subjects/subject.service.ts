@@ -9,7 +9,7 @@ import type {
   AddPrerequisiteInput,
   AddCorequisiteInput,
 } from "@/types/schemas/subjects/subject.schemas";
-import type { Subject } from "generated/prisma/client";
+import type { Subject } from "@prisma/client";
 
 // =====================================================
 // SUBJECT SERVICE

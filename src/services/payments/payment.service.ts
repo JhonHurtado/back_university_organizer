@@ -11,7 +11,7 @@ import type {
   PaymentQueryInput,
   InvoiceQueryInput,
 } from "@/types/schemas/payments/payment.schemas";
-import type { Payment, Invoice } from "generated/prisma/client";
+import type { Payment, Invoice } from "@prisma/client";
 
 // =====================================================
 // PAYMENT SERVICE

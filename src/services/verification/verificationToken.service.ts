@@ -3,7 +3,7 @@
 // =====================================================
 import database from "@/lib/prisma/prisma";
 import { randomUUID } from "crypto";
-import { TokenType } from "generated/prisma/enums";
+import { TokenType } from "@prisma/client";
 
 const TOKEN_EXPIRY = {
   EMAIL_VERIFICATION: 24 * 60 * 60 * 1000, // 24 horas

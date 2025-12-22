@@ -4,8 +4,8 @@ import { OAuth2Client } from "google-auth-library";
 import { ENV } from "@/config/config";
 import database from "@/lib/prisma/prisma";
 import type { GoogleTokenPayload } from "@/types/jwt/JWT.types";
-import { User } from "generated/prisma/client";
 import crypto from "crypto";
+import { User } from "@prisma/client";
 
 const googleClient = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
 

@@ -11,7 +11,7 @@ import type {
   CancelSubscriptionInput,
   SubscriptionQueryInput,
 } from "@/types/schemas/subscriptions/subscription.schemas";
-import type { Plan, Subscription } from "generated/prisma/client";
+import type { Plan, Subscription } from "@prisma/client";
 
 // =====================================================
 // SUBSCRIPTION SERVICE

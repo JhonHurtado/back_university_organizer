@@ -3,7 +3,7 @@ import type {
   User,
   Subscription,
   Plan,
-} from "generated/prisma/client";
+} from "@prisma/client";
 
 export interface CreateSessionData {
   userId: string;

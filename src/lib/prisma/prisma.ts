@@ -1,5 +1,4 @@
-import { PrismaClient } from "../../../generated/prisma/client";
-import { Prisma } from "../../../generated/prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 // Extender la interfaz global de Node
 declare global {

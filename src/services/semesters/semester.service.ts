@@ -6,7 +6,7 @@ import type {
   CreateSemesterInput,
   UpdateSemesterInput,
 } from "@/types/schemas/semesters/semester.schemas";
-import type { Semester } from "generated/prisma/client";
+import type { Semester } from "@prisma/client";
 
 // =====================================================
 // SEMESTER SERVICE

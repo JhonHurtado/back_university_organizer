@@ -7,7 +7,7 @@ import type {
   UpdateEnrollmentInput,
   EnrollmentQueryInput,
 } from "@/types/schemas/enrollments/enrollment.schemas";
-import type { SubjectEnrollment } from "generated/prisma/client";
+import type { SubjectEnrollment } from "@prisma/client";
 
 // =====================================================
 // ENROLLMENT SERVICE

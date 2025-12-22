@@ -2,7 +2,7 @@
 // =====================================================
 import database from "@/lib/prisma/prisma";
 import bcrypt from "bcrypt";
-import type { User, Prisma } from "generated/prisma/client";
+import type { User, Prisma } from "@prisma/client";
 
 // =====================================================
 // TYPES
