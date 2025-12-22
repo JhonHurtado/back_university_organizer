@@ -13,6 +13,7 @@ import notificationRoutes from "./notifications/notification.routes";
 import subscriptionRoutes from "./subscriptions/subscription.routes";
 import paymentRoutes from "./payments/payment.routes";
 import preferenceRoutes from "./preferences/preference.routes";
+import professorRoutes from "./professors/professor.routes";
 
 const router = Router();
 
@@ -27,5 +28,6 @@ router.use("/notifications", notificationRoutes);
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/preferences", preferenceRoutes);
+router.use("/professors", professorRoutes);
 
 export default router;
