@@ -6,6 +6,8 @@ import database from "@/lib/prisma/prisma";
 import type { GoogleTokenPayload } from "@/types/jwt/JWT.types";
 import crypto from "crypto";
 import { User } from "@prisma/client";
+import { createEmailVerificationToken } from "@/services/verification/verificationToken.service";
+import { emailService } from "@/services/email/email.service";
 
 const googleClient = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
 
@@ -27,7 +29,7 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(data.password, 12);
 
-      return await database.user.create({
+      const user = await database.user.create({
         data: {
           email,
           password: hashedPassword,
@@ -37,6 +39,21 @@ export class AuthService {
         },
         include: { subscription: { include: { plan: true } } },
       });
+
+      // Enviar email de verificación
+      try {
+        const verificationToken = await createEmailVerificationToken(user.id);
+        await emailService.sendVerificationEmail(
+          user.email,
+          user.firstName,
+          verificationToken.token
+        );
+      } catch (error) {
+        console.error("Failed to send verification email:", error);
+        // No fallar el registro si falla el envío del email
+      }
+
+      return user;
     } catch (error) {
       console.error("AuthService.register error:", error);
       throw error;

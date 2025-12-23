@@ -6,6 +6,7 @@ import passport from "@/config/auth/passport";
 import { sessionConfig } from "@/config/session";
 import { corsConfig, helmetConfig, limiter } from "@/config/security";
 import routes from "@/routes/index.routes";
+import { autoLogActivity } from "@/middleware/activityLog/activityLog.middleware";
 
 dotenv.config();
 
@@ -31,6 +32,9 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(session(sessionConfig));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Activity Logging (after auth, before routes)
+app.use(autoLogActivity());
 
 // Health check
 app.get("/health", (_, res) => res.status(200).json({ status: "ok" }));

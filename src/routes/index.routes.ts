@@ -15,6 +15,9 @@ import paymentRoutes from "./payments/payment.routes";
 import preferenceRoutes from "./preferences/preference.routes";
 import professorRoutes from "./professors/professor.routes";
 import menuRoutes from "./menus/menu.routes";
+import activityLogRoutes from "./activityLogs/activityLog.routes";
+import verificationRoutes from "./verification/verification.routes";
+import analyticsRoutes from "./analytics/analytics.routes";
 
 const router = Router();
 
@@ -31,5 +34,8 @@ router.use("/payments", paymentRoutes);
 router.use("/preferences", preferenceRoutes);
 router.use("/professors", professorRoutes);
 router.use("/menus", menuRoutes);
+router.use("/activity-logs", activityLogRoutes);
+router.use("/verification", verificationRoutes);
+router.use("/analytics", analyticsRoutes);
 
 export default router;
