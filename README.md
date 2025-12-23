@@ -254,28 +254,30 @@ El servidor estará disponible en `http://localhost:3000`
 
 | Variable | Descripción | Requerido | Default |
 |----------|-------------|-----------|---------|
+| **Server** | | | |
+| `PORT` | Puerto del servidor | ❌ | 3000 |
+| `NODE_ENV` | Entorno de ejecución (development/production) | ❌ | development |
+| `API_URL` | URL de la API (para callbacks OAuth) | ❌ | http://localhost:3000 |
+| `FRONTEND_URL` | URL del frontend (para emails y redirecciones) | ❌ | http://localhost:3001 |
+| **Database** | | | |
 | `DATABASE_URL` | URL de conexión a PostgreSQL | ✅ | - |
+| **JWT & Authentication** | | | |
 | `JWT_SECRET` | Secret para tokens de acceso (min 32 chars) | ✅ | - |
-| `JWT_ISSUER` | Emisor de los tokens JWT | ❌ | university-organizer-api |
-| `JWT_EXPIRES_IN` | Tiempo de expiración del access token | ❌ | 15m |
 | `JWT_REFRESH_SECRET` | Secret para refresh tokens (min 32 chars) | ✅ | - |
-| `JWT_REFRESH_EXPIRES_IN` | Tiempo de expiración del refresh token | ❌ | 7d |
+| `JWT_ISSUER` | Emisor de los tokens JWT | ❌ | university-organizer |
+| `TOKEN_EXPIRATION` | Tiempo de expiración en segundos | ❌ | 900 (15 min) |
+| `SESSION_SECRET` | Secret para las sesiones (min 32 chars) | ✅ | - |
+| **Google OAuth (Opcional)** | | | |
 | `GOOGLE_CLIENT_ID` | Client ID de Google OAuth | ❌ | - |
 | `GOOGLE_CLIENT_SECRET` | Client Secret de Google OAuth | ❌ | - |
-| `GOOGLE_CALLBACK_URL` | URL de callback de Google OAuth | ❌ | - |
-| `PORT` | Puerto del servidor | ❌ | 3000 |
-| `NODE_ENV` | Entorno de ejecución | ❌ | development |
-| `ALLOWED_ORIGINS` | Orígenes permitidos para CORS (separados por coma) | ❌ | * |
-| `RATE_LIMIT_WINDOW_MS` | Ventana de tiempo para rate limiting (ms) | ❌ | 900000 |
-| `RATE_LIMIT_MAX_REQUESTS` | Máximo de requests por ventana | ❌ | 100 |
+| **Email (SMTP)** | | | |
 | `SMTP_HOST` | Host del servidor SMTP | ❌ | smtp.gmail.com |
 | `SMTP_PORT` | Puerto del servidor SMTP | ❌ | 587 |
 | `SMTP_SECURE` | Usar SSL/TLS (true para puerto 465) | ❌ | false |
-| `SMTP_USER` | Usuario SMTP | ❌ | - |
-| `SMTP_PASS` | Contraseña SMTP | ❌ | - |
-| `FROM_EMAIL` | Email remitente | ❌ | SMTP_USER |
-| `FROM_NAME` | Nombre remitente | ❌ | University Organizer |
-| `FRONTEND_URL` | URL del frontend para links de verificación | ❌ | http://localhost:3000 |
+| `SMTP_USER` | Usuario/Email SMTP | ❌ | - |
+| `SMTP_PASS` | Contraseña SMTP (App Password para Gmail) | ❌ | - |
+| `EMAIL_FROM` | Email remitente | ❌ | SMTP_USER |
+| `EMAIL_FROM_NAME` | Nombre del remitente | ❌ | University Organizer |
 
 ### Escalas de Calificación Soportadas
 

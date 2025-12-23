@@ -7,6 +7,7 @@ import { sessionConfig } from "@/config/session";
 import { corsConfig, helmetConfig, limiter } from "@/config/security";
 import routes from "@/routes/index.routes";
 import { autoLogActivity } from "@/middleware/activityLog/activityLog.middleware";
+import { ENV } from "@/config/config";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Logging
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(morgan(ENV.NODE_ENV === "production" ? "combined" : "dev"));
 
 // Session & Auth
 app.use(session(sessionConfig));

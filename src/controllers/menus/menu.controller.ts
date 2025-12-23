@@ -12,9 +12,14 @@ import {
 } from "@/types/schemas/menus/menu.schemas";
 import { ZodError } from "zod";
 import {
-  sendError,
-  sendErrorValidation,
   sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendConflict,
+  sendBadRequest,
+  sendServerError,
+  sendValidationError,
+  sendUnauthorized,
 } from "@/utils/response/apiResponse";
 
 // =====================================================
@@ -25,9 +30,8 @@ export async function create(req: Request, res: Response) {
     const data = createMenuSchema.parse(req.body);
     const menu = await menuService.create(data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Menú creado exitosamente",
       data: menu,
     });
@@ -39,32 +43,20 @@ export async function create(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PARENT_MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú padre no encontrado",
-        error: "PARENT_MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú padre no encontrado",
       });
     }
 
     if (error.message === "MENU_NAME_EXISTS") {
-      return sendError({
-        res,
-        code: 409,
-        message: "Ya existe un menú con ese nombre",
-        error: "MENU_NAME_EXISTS",
+      return sendConflict({ res, message: "Ya existe un menú con ese nombre",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al crear menú",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al crear menú",
     });
   }
 }
@@ -82,11 +74,7 @@ export async function getAll(_req: Request, res: Response) {
       data: menus,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener menús",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener menús",
     });
   }
 }
@@ -104,11 +92,7 @@ export async function getMenuTree(_req: Request, res: Response) {
       data: menuTree,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener árbol de menús",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener árbol de menús",
     });
   }
 }
@@ -121,11 +105,7 @@ export async function getMenuTreeByUser(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
-        res,
-        code: 401,
-        message: "No autenticado",
-        error: "UNAUTHORIZED",
+      return sendUnauthorized({ res, message: "No autenticado",
       });
     }
 
@@ -137,11 +117,7 @@ export async function getMenuTreeByUser(req: Request, res: Response) {
       data: menuTree,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener menú del usuario",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener menú del usuario",
     });
   }
 }
@@ -167,23 +143,15 @@ export async function getById(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú no encontrado",
-        error: "MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener menú",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener menú",
     });
   }
 }
@@ -211,50 +179,30 @@ export async function update(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú no encontrado",
-        error: "MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú no encontrado",
       });
     }
 
     if (error.message === "PARENT_MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú padre no encontrado",
-        error: "PARENT_MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú padre no encontrado",
       });
     }
 
     if (error.message === "CIRCULAR_REFERENCE") {
-      return sendError({
-        res,
-        code: 400,
-        message: "No se puede asignar el menú como su propio padre",
-        error: "CIRCULAR_REFERENCE",
+      return sendBadRequest({ res, message: "No se puede asignar el menú como su propio padre",
       });
     }
 
     if (error.message === "MENU_NAME_EXISTS") {
-      return sendError({
-        res,
-        code: 409,
-        message: "Ya existe un menú con ese nombre",
-        error: "MENU_NAME_EXISTS",
+      return sendConflict({ res, message: "Ya existe un menú con ese nombre",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar menú",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar menú",
     });
   }
 }
@@ -280,32 +228,20 @@ export async function softDelete(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú no encontrado",
-        error: "MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú no encontrado",
       });
     }
 
     if (error.message === "MENU_HAS_CHILDREN") {
-      return sendError({
-        res,
-        code: 400,
-        message: "No se puede eliminar un menú que tiene submenús",
-        error: "MENU_HAS_CHILDREN",
+      return sendBadRequest({ res, message: "No se puede eliminar un menú que tiene submenús",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al eliminar menú",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al eliminar menú",
     });
   }
 }
@@ -331,23 +267,15 @@ export async function restore(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú no encontrado o ya está activo",
-        error: "MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú no encontrado o ya está activo",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al restaurar menú",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al restaurar menú",
     });
   }
 }
@@ -360,9 +288,8 @@ export async function assignPlanAccess(req: Request, res: Response) {
     const data = planMenuAccessSchema.parse(req.body);
     const access = await menuService.assignPlanAccess(data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Acceso de plan asignado exitosamente",
       data: access,
     });
@@ -374,32 +301,20 @@ export async function assignPlanAccess(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "MENU_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Menú no encontrado",
-        error: "MENU_NOT_FOUND",
+      return sendNotFound({ res, message: "Menú no encontrado",
       });
     }
 
     if (error.message === "PLAN_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Plan no encontrado",
-        error: "PLAN_NOT_FOUND",
+      return sendNotFound({ res, message: "Plan no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al asignar acceso",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al asignar acceso",
     });
   }
 }
@@ -412,11 +327,7 @@ export async function updatePlanAccess(req: Request, res: Response) {
     const { planId, menuId } = req.body;
 
     if (!planId || !menuId) {
-      return sendError({
-        res,
-        code: 400,
-        message: "planId y menuId son requeridos",
-        error: "MISSING_PARAMETERS",
+      return sendBadRequest({ res, message: "planId y menuId son requeridos",
       });
     }
 
@@ -436,23 +347,15 @@ export async function updatePlanAccess(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "ACCESS_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Acceso no encontrado",
-        error: "ACCESS_NOT_FOUND",
+      return sendNotFound({ res, message: "Acceso no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar acceso",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar acceso",
     });
   }
 }
@@ -465,11 +368,7 @@ export async function removePlanAccess(req: Request, res: Response) {
     const { planId, menuId } = req.body;
 
     if (!planId || !menuId) {
-      return sendError({
-        res,
-        code: 400,
-        message: "planId y menuId son requeridos",
-        error: "MISSING_PARAMETERS",
+      return sendBadRequest({ res, message: "planId y menuId son requeridos",
       });
     }
 
@@ -482,19 +381,11 @@ export async function removePlanAccess(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error.message === "ACCESS_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Acceso no encontrado",
-        error: "ACCESS_NOT_FOUND",
+      return sendNotFound({ res, message: "Acceso no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al remover acceso",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al remover acceso",
     });
   }
 }
@@ -507,11 +398,7 @@ export async function getPlanAccess(req: Request, res: Response) {
     const { planId } = req.params;
 
     if (!planId) {
-      return sendError({
-        res,
-        code: 400,
-        message: "planId es requerido",
-        error: "MISSING_PARAMETERS",
+      return sendBadRequest({ res, message: "planId es requerido",
       });
     }
 
@@ -523,11 +410,7 @@ export async function getPlanAccess(req: Request, res: Response) {
       data: access,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener accesos del plan",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener accesos del plan",
     });
   }
 }

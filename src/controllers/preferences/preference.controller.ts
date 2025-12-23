@@ -11,9 +11,10 @@ import {
 } from "@/types/schemas/preferences/preference.schemas";
 import { ZodError } from "zod";
 import {
-  sendError,
-  sendErrorValidation,
   sendSuccess,
+  sendServerError,
+  sendValidationError,
+  sendUnauthorized,
 } from "@/utils/response/apiResponse";
 
 // =====================================================
@@ -24,11 +25,7 @@ export async function getPreferences(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
-        res,
-        code: 401,
-        message: "No autenticado",
-        error: "UNAUTHORIZED",
+      return sendUnauthorized({ res, message: "No autenticado",
       });
     }
 
@@ -45,11 +42,7 @@ export async function getPreferences(req: Request, res: Response) {
       data: preferences,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener preferencias",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener preferencias",
     });
   }
 }
@@ -62,11 +55,7 @@ export async function updatePreferences(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
-        res,
-        code: 401,
-        message: "No autenticado",
-        error: "UNAUTHORIZED",
+      return sendUnauthorized({ res, message: "No autenticado",
       });
     }
 
@@ -86,14 +75,10 @@ export async function updatePreferences(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar preferencias",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar preferencias",
     });
   }
 }
@@ -109,11 +94,7 @@ export async function updateNotificationPreferences(
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
-        res,
-        code: 401,
-        message: "No autenticado",
-        error: "UNAUTHORIZED",
+      return sendUnauthorized({ res, message: "No autenticado",
       });
     }
 
@@ -136,14 +117,10 @@ export async function updateNotificationPreferences(
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar preferencias de notificación",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar preferencias de notificación",
     });
   }
 }
@@ -156,11 +133,7 @@ export async function updateDisplayPreferences(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
-        res,
-        code: 401,
-        message: "No autenticado",
-        error: "UNAUTHORIZED",
+      return sendUnauthorized({ res, message: "No autenticado",
       });
     }
 
@@ -183,14 +156,10 @@ export async function updateDisplayPreferences(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar preferencias de visualización",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar preferencias de visualización",
     });
   }
 }
@@ -203,11 +172,7 @@ export async function updateAcademicPreferences(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
-        res,
-        code: 401,
-        message: "No autenticado",
-        error: "UNAUTHORIZED",
+      return sendUnauthorized({ res, message: "No autenticado",
       });
     }
 
@@ -230,14 +195,10 @@ export async function updateAcademicPreferences(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar preferencias académicas",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar preferencias académicas",
     });
   }
 }

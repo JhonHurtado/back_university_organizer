@@ -11,9 +11,13 @@ import {
 } from "@/types/schemas/users/user.schemas";
 import { ZodError } from "zod";
 import {
-  sendError,
-  sendErrorValidation,
   sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendConflict,
+  sendServerError,
+  sendValidationError,
+  sendBadRequest,
 } from "@/utils/response/apiResponse";
 
 // =====================================================
@@ -24,9 +28,8 @@ export async function create(req: Request, res: Response) {
     const data = createUserSchema.parse(req.body);
     const user = await userService.create(data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Usuario creado exitosamente",
       data: {
         id: user.id,
@@ -48,23 +51,19 @@ export async function create(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "EMAIL_EXISTS") {
-      return sendError({
+      return sendConflict({
         res,
-        code: 409,
         message: "El email ya está registrado",
-        error: "EMAIL_EXISTS",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al crear usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -89,11 +88,9 @@ export async function getAll(req: Request, res: Response) {
       data: result,
     });
   } catch (error) {
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al obtener usuarios",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -107,11 +104,9 @@ export async function getById(req: Request, res: Response) {
     const user = await userService.findById(id);
 
     if (!user) {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Usuario no encontrado",
-        error: "NOT_FOUND",
       });
     }
 
@@ -128,14 +123,12 @@ export async function getById(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al obtener usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -173,23 +166,19 @@ export async function update(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "EMAIL_EXISTS") {
-      return sendError({
+      return sendConflict({
         res,
-        code: 409,
         message: "El email ya está registrado",
-        error: "EMAIL_EXISTS",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al actualizar usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -207,6 +196,7 @@ export async function updatePassword(req: Request, res: Response) {
     return sendSuccess({
       res,
       message: "Contraseña actualizada exitosamente",
+      data: null,
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
@@ -216,14 +206,12 @@ export async function updatePassword(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al actualizar contraseña",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -239,6 +227,7 @@ export async function activate(req: Request, res: Response) {
     return sendSuccess({
       res,
       message: "Usuario activado exitosamente",
+      data: null,
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
@@ -248,14 +237,12 @@ export async function activate(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al activar usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -271,6 +258,7 @@ export async function deactivate(req: Request, res: Response) {
     return sendSuccess({
       res,
       message: "Usuario desactivado exitosamente",
+      data: null,
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
@@ -280,14 +268,12 @@ export async function deactivate(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al desactivar usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -303,6 +289,7 @@ export async function softDelete(req: Request, res: Response) {
     return sendSuccess({
       res,
       message: "Usuario eliminado exitosamente",
+      data: null,
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
@@ -312,14 +299,12 @@ export async function softDelete(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al eliminar usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -335,6 +320,7 @@ export async function restore(req: Request, res: Response) {
     return sendSuccess({
       res,
       message: "Usuario restaurado exitosamente",
+      data: null,
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
@@ -344,14 +330,12 @@ export async function restore(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al restaurar usuario",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -377,14 +361,12 @@ export async function getStats(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al obtener estadísticas",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -397,11 +379,9 @@ export async function search(req: Request, res: Response) {
     const { query, limit } = req.query;
 
     if (!query) {
-      return sendError({
+      return sendBadRequest({
         res,
-        code: 400,
-        message: "El parámetro 'q' es requerido",
-        error: "MISSING_QUERY",
+        message: "El parámetro 'query' es requerido",
       });
     }
 
@@ -416,11 +396,9 @@ export async function search(req: Request, res: Response) {
       data: users,
     });
   } catch (error) {
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error en la búsqueda",
-      error: "SERVER_ERROR",
     });
   }
 }

@@ -11,9 +11,12 @@ import {
 } from "@/types/schemas/professors/professor.schemas";
 import { ZodError } from "zod";
 import {
-  sendError,
-  sendErrorValidation,
   sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendBadRequest,
+  sendServerError,
+  sendValidationError,
 } from "@/utils/response/apiResponse";
 
 // =====================================================
@@ -24,9 +27,8 @@ export async function create(req: Request, res: Response) {
     const data = createProfessorSchema.parse(req.body);
     const professor = await professorService.create(data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Profesor creado exitosamente",
       data: professor,
     });
@@ -38,14 +40,10 @@ export async function create(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al crear profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al crear profesor",
     });
   }
 }
@@ -73,11 +71,7 @@ export async function getAll(req: Request, res: Response) {
       },
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener profesores",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener profesores",
     });
   }
 }
@@ -90,11 +84,7 @@ export async function search(req: Request, res: Response) {
     const { q } = req.query;
 
     if (!q || typeof q !== "string") {
-      return sendError({
-        res,
-        code: 400,
-        message: "Parámetro de búsqueda requerido",
-        error: "MISSING_SEARCH_QUERY",
+      return sendBadRequest({ res, message: "Parámetro de búsqueda requerido",
       });
     }
 
@@ -106,11 +96,7 @@ export async function search(req: Request, res: Response) {
       data: professors,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al buscar profesores",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al buscar profesores",
     });
   }
 }
@@ -136,23 +122,15 @@ export async function getById(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PROFESSOR_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Profesor no encontrado",
-        error: "PROFESSOR_NOT_FOUND",
+      return sendNotFound({ res, message: "Profesor no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener profesor",
     });
   }
 }
@@ -180,23 +158,15 @@ export async function update(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PROFESSOR_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Profesor no encontrado",
-        error: "PROFESSOR_NOT_FOUND",
+      return sendNotFound({ res, message: "Profesor no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar profesor",
     });
   }
 }
@@ -222,33 +192,21 @@ export async function softDelete(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PROFESSOR_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Profesor no encontrado",
-        error: "PROFESSOR_NOT_FOUND",
+      return sendNotFound({ res, message: "Profesor no encontrado",
       });
     }
 
     if (error.message === "PROFESSOR_HAS_ACTIVE_ENROLLMENTS") {
-      return sendError({
-        res,
-        code: 400,
-        message:
+      return sendBadRequest({ res, message:
           "No se puede eliminar el profesor porque tiene inscripciones activas",
-        error: "PROFESSOR_HAS_ACTIVE_ENROLLMENTS",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al eliminar profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al eliminar profesor",
     });
   }
 }
@@ -274,23 +232,15 @@ export async function restore(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PROFESSOR_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Profesor no encontrado o ya está activo",
-        error: "PROFESSOR_NOT_FOUND",
+      return sendNotFound({ res, message: "Profesor no encontrado o ya está activo",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al restaurar profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al restaurar profesor",
     });
   }
 }
@@ -303,9 +253,8 @@ export async function assignToEnrollment(req: Request, res: Response) {
     const data = assignProfessorSchema.parse(req.body);
     const assignment = await professorService.assignToEnrollment(data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Profesor asignado exitosamente",
       data: assignment,
     });
@@ -317,41 +266,25 @@ export async function assignToEnrollment(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PROFESSOR_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Profesor no encontrado",
-        error: "PROFESSOR_NOT_FOUND",
+      return sendNotFound({ res, message: "Profesor no encontrado",
       });
     }
 
     if (error.message === "ENROLLMENT_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Inscripción no encontrada",
-        error: "ENROLLMENT_NOT_FOUND",
+      return sendNotFound({ res, message: "Inscripción no encontrada",
       });
     }
 
     if (error.message === "PROFESSOR_ALREADY_ASSIGNED") {
-      return sendError({
-        res,
-        code: 400,
-        message: "El profesor ya está asignado a esta inscripción",
-        error: "PROFESSOR_ALREADY_ASSIGNED",
+      return sendBadRequest({ res, message: "El profesor ya está asignado a esta inscripción",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al asignar profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al asignar profesor",
     });
   }
 }
@@ -364,11 +297,7 @@ export async function removeFromEnrollment(req: Request, res: Response) {
     const { enrollmentId, professorId } = req.body;
 
     if (!enrollmentId || !professorId) {
-      return sendError({
-        res,
-        code: 400,
-        message: "enrollmentId y professorId son requeridos",
-        error: "MISSING_PARAMETERS",
+      return sendBadRequest({ res, message: "enrollmentId y professorId son requeridos",
       });
     }
 
@@ -381,19 +310,11 @@ export async function removeFromEnrollment(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error.message === "ASSIGNMENT_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Asignación no encontrada",
-        error: "ASSIGNMENT_NOT_FOUND",
+      return sendNotFound({ res, message: "Asignación no encontrada",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al remover profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al remover profesor",
     });
   }
 }
@@ -419,23 +340,15 @@ export async function getProfessorSubjects(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "PROFESSOR_NOT_FOUND") {
-      return sendError({
-        res,
-        code: 404,
-        message: "Profesor no encontrado",
-        error: "PROFESSOR_NOT_FOUND",
+      return sendNotFound({ res, message: "Profesor no encontrado",
       });
     }
 
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener materias del profesor",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener materias del profesor",
     });
   }
 }

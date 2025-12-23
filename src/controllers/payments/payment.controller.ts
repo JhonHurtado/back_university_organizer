@@ -3,7 +3,14 @@
 // =====================================================
 import type { Request, Response } from "express";
 import { paymentService } from "@/services/payments/payment.service";
-import { sendError, sendErrorValidation, sendSuccess } from "@/utils/response/apiResponse";
+import {
+  sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendBadRequest,
+  sendServerError,
+  sendValidationError,
+} from "@/utils/response/apiResponse";
 import { ZodError } from "zod";
 import * as paymentSchemas from "@/types/schemas/payments/payment.schemas";
 
@@ -14,15 +21,15 @@ export async function createPayment(req: Request, res: Response) {
   try {
     const data = paymentSchemas.createPaymentSchema.parse(req.body);
     const payment = await paymentService.createPayment(data);
-    return sendSuccess({ res, code: 201, message: "Pago creado exitosamente", data: payment });
+    return sendCreated({ res, message: "Pago creado exitosamente", data: payment });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
     if (error.message === "SUBSCRIPTION_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Suscripción no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Suscripción no encontrada" });
     }
-    return sendError({ res, code: 500, message: "Error al crear pago", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al crear pago" });
   }
 }
 
@@ -30,10 +37,10 @@ export async function getPaymentById(req: Request, res: Response) {
   try {
     const { id } = paymentSchemas.paymentIdSchema.parse(req.params);
     const payment = await paymentService.getPaymentById(id);
-    if (!payment) return sendError({ res, code: 404, message: "Pago no encontrado", error: "NOT_FOUND" });
+    if (!payment) return sendNotFound({ res, message: "Pago no encontrado" });
     return sendSuccess({ res, message: "Pago obtenido exitosamente", data: payment });
   } catch (error: any) {
-    return sendError({ res, code: 500, message: "Error al obtener pago", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al obtener pago" });
   }
 }
 
@@ -45,9 +52,9 @@ export async function getPaymentsByUser(req: Request, res: Response) {
     return sendSuccess({ res, message: "Pagos obtenidos exitosamente", data: result });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
-    return sendError({ res, code: 500, message: "Error al obtener pagos", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al obtener pagos" });
   }
 }
 
@@ -59,12 +66,12 @@ export async function updatePayment(req: Request, res: Response) {
     return sendSuccess({ res, message: "Pago actualizado exitosamente", data: payment });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
     if (error.message === "PAYMENT_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Pago no encontrado", error: error.message });
+      return sendNotFound({ res, message: "Pago no encontrado" });
     }
-    return sendError({ res, code: 500, message: "Error al actualizar pago", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al actualizar pago" });
   }
 }
 
@@ -75,12 +82,12 @@ export async function processPayment(req: Request, res: Response) {
     return sendSuccess({ res, message: "Pago en proceso", data: payment });
   } catch (error: any) {
     if (error.message === "PAYMENT_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Pago no encontrado", error: error.message });
+      return sendNotFound({ res, message: "Pago no encontrado" });
     }
     if (error.message === "PAYMENT_ALREADY_PROCESSED") {
-      return sendError({ res, code: 400, message: "El pago ya ha sido procesado", error: error.message });
+      return sendBadRequest({ res, message: "El pago ya ha sido procesado" });
     }
-    return sendError({ res, code: 500, message: "Error al procesar pago", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al procesar pago" });
   }
 }
 
@@ -92,18 +99,18 @@ export async function refundPayment(req: Request, res: Response) {
     return sendSuccess({ res, message: "Reembolso procesado exitosamente", data: payment });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
     if (error.message === "PAYMENT_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Pago no encontrado", error: error.message });
+      return sendNotFound({ res, message: "Pago no encontrado" });
     }
     if (error.message === "PAYMENT_NOT_COMPLETED") {
-      return sendError({ res, code: 400, message: "Solo se pueden reembolsar pagos completados", error: error.message });
+      return sendBadRequest({ res, message: "Solo se pueden reembolsar pagos completados" });
     }
     if (error.message === "REFUND_AMOUNT_EXCEEDS_PAYMENT") {
-      return sendError({ res, code: 400, message: "El monto del reembolso excede el monto del pago", error: error.message });
+      return sendBadRequest({ res, message: "El monto del reembolso excede el monto del pago" });
     }
-    return sendError({ res, code: 500, message: "Error al procesar reembolso", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al procesar reembolso" });
   }
 }
 
@@ -114,18 +121,18 @@ export async function createInvoice(req: Request, res: Response) {
   try {
     const data = paymentSchemas.createInvoiceSchema.parse(req.body);
     const invoice = await paymentService.createInvoice(data);
-    return sendSuccess({ res, code: 201, message: "Factura creada exitosamente", data: invoice });
+    return sendCreated({ res, message: "Factura creada exitosamente", data: invoice });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
     if (error.message === "SUBSCRIPTION_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Suscripción no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Suscripción no encontrada" });
     }
     if (error.message === "PAYMENT_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Pago no encontrado", error: error.message });
+      return sendNotFound({ res, message: "Pago no encontrado" });
     }
-    return sendError({ res, code: 500, message: "Error al crear factura", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al crear factura" });
   }
 }
 
@@ -133,10 +140,10 @@ export async function getInvoiceById(req: Request, res: Response) {
   try {
     const { id } = paymentSchemas.invoiceIdSchema.parse(req.params);
     const invoice = await paymentService.getInvoiceById(id);
-    if (!invoice) return sendError({ res, code: 404, message: "Factura no encontrada", error: "NOT_FOUND" });
+    if (!invoice) return sendNotFound({ res, message: "Factura no encontrada" });
     return sendSuccess({ res, message: "Factura obtenida exitosamente", data: invoice });
   } catch (error: any) {
-    return sendError({ res, code: 500, message: "Error al obtener factura", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al obtener factura" });
   }
 }
 
@@ -148,9 +155,9 @@ export async function getInvoicesByUser(req: Request, res: Response) {
     return sendSuccess({ res, message: "Facturas obtenidas exitosamente", data: result });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
-    return sendError({ res, code: 500, message: "Error al obtener facturas", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al obtener facturas" });
   }
 }
 
@@ -162,12 +169,12 @@ export async function updateInvoice(req: Request, res: Response) {
     return sendSuccess({ res, message: "Factura actualizada exitosamente", data: invoice });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
     if (error.message === "INVOICE_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Factura no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Factura no encontrada" });
     }
-    return sendError({ res, code: 500, message: "Error al actualizar factura", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al actualizar factura" });
   }
 }
 
@@ -179,12 +186,12 @@ export async function markInvoiceAsPaid(req: Request, res: Response) {
     return sendSuccess({ res, message: "Factura marcada como pagada", data: invoice });
   } catch (error: any) {
     if (error.message === "INVOICE_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Factura no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Factura no encontrada" });
     }
     if (error.message === "PAYMENT_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Pago no encontrado", error: error.message });
+      return sendNotFound({ res, message: "Pago no encontrado" });
     }
-    return sendError({ res, code: 500, message: "Error al marcar factura como pagada", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al marcar factura como pagada" });
   }
 }
 
@@ -195,12 +202,12 @@ export async function deleteInvoice(req: Request, res: Response) {
     return sendSuccess({ res, message: "Factura eliminada exitosamente" });
   } catch (error: any) {
     if (error.message === "INVOICE_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Factura no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Factura no encontrada" });
     }
     if (error.message === "CANNOT_DELETE_PAID_INVOICE") {
-      return sendError({ res, code: 400, message: "No se puede eliminar una factura pagada", error: error.message });
+      return sendBadRequest({ res, message: "No se puede eliminar una factura pagada" });
     }
-    return sendError({ res, code: 500, message: "Error al eliminar factura", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al eliminar factura" });
   }
 }
 
@@ -209,7 +216,7 @@ export async function generateInvoiceNumber(_req: Request, res: Response) {
     const invoiceNumber = await paymentService.generateInvoiceNumber();
     return sendSuccess({ res, message: "Número de factura generado", data: { invoiceNumber } });
   } catch (error: any) {
-    return sendError({ res, code: 500, message: "Error al generar número de factura", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al generar número de factura" });
   }
 }
 
@@ -223,7 +230,7 @@ export async function handlePaymentWebhook(req: Request, res: Response) {
     // TODO: Verify webhook signature
     // const isValid = verifyWebhookSignature(data.signature, req.body);
     // if (!isValid) {
-    //   return sendError({ res, code: 401, message: "Firma inválida", error: "INVALID_SIGNATURE" });
+    //   return sendUnauthorized({ res, message: "Firma inválida" });
     // }
 
     // Process webhook event
@@ -254,9 +261,9 @@ export async function handlePaymentWebhook(req: Request, res: Response) {
     return sendSuccess({ res, message: "Webhook procesado exitosamente" });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
+      return sendValidationError({ res, errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}) });
     }
     console.error("Webhook error:", error);
-    return sendError({ res, code: 500, message: "Error al procesar webhook", error: "SERVER_ERROR" });
+    return sendServerError({ res, message: "Error al procesar webhook" });
   }
 }

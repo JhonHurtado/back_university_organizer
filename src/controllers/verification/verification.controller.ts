@@ -2,7 +2,12 @@
 // controllers/verification/verification.controller.ts
 // =====================================================
 import type { Request, Response } from "express";
-import { sendError, sendErrorValidation, sendSuccess } from "@/utils/response/apiResponse";
+import {
+  sendSuccess,
+  sendBadRequest,
+  sendServerError,
+  sendValidationError,
+} from "@/utils/response/apiResponse";
 import { ZodError } from "zod";
 import * as verificationSchemas from "@/types/schemas/verification/verification.schemas";
 import * as verificationTokenService from "@/services/verification/verificationToken.service";
@@ -24,11 +29,7 @@ export async function verifyEmail(req: Request, res: Response) {
     );
 
     if (!verificationRecord) {
-      return sendError({
-        res,
-        code: 400,
-        message: "Token inválido o expirado",
-        error: "INVALID_TOKEN",
+      return sendBadRequest({ res, message: "Token inválido o expirado",
       });
     }
 
@@ -65,16 +66,12 @@ export async function verifyEmail(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al verificar el email",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al verificar el email",
     });
   }
 }
@@ -101,11 +98,7 @@ export async function resendVerificationEmail(req: Request, res: Response) {
 
     // Si ya está verificado, no hacer nada
     if (user.emailVerified) {
-      return sendError({
-        res,
-        code: 400,
-        message: "El email ya está verificado",
-        error: "EMAIL_ALREADY_VERIFIED",
+      return sendBadRequest({ res, message: "El email ya está verificado",
       });
     }
 
@@ -125,16 +118,12 @@ export async function resendVerificationEmail(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al enviar el email de verificación",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al enviar el email de verificación",
     });
   }
 }
@@ -175,16 +164,12 @@ export async function requestPasswordReset(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al procesar la solicitud",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al procesar la solicitud",
     });
   }
 }
@@ -203,11 +188,7 @@ export async function resetPassword(req: Request, res: Response) {
     );
 
     if (!verificationRecord) {
-      return sendError({
-        res,
-        code: 400,
-        message: "Token inválido o expirado",
-        error: "INVALID_TOKEN",
+      return sendBadRequest({ res, message: "Token inválido o expirado",
       });
     }
 
@@ -237,16 +218,12 @@ export async function resetPassword(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al restablecer la contraseña",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al restablecer la contraseña",
     });
   }
 }

@@ -3,22 +3,23 @@
 // =====================================================
 import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
+import { ENV } from "@/config/config";
 
 // =====================================================
 // EMAIL SERVICE CONFIG
 // =====================================================
 const EMAIL_CONFIG = {
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+  host: ENV.SMTP_HOST,
+  port: parseInt(ENV.SMTP_PORT),
+  secure: ENV.SMTP_SECURE === "true", // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: ENV.SMTP_USER,
+    pass: ENV.SMTP_PASS,
   },
 };
 
-const FROM_EMAIL = process.env.FROM_EMAIL || process.env.SMTP_USER;
-const FROM_NAME = process.env.FROM_NAME || "University Organizer";
+const FROM_EMAIL = ENV.EMAIL_FROM;
+const FROM_NAME = ENV.EMAIL_FROM_NAME;
 
 // =====================================================
 // EMAIL SERVICE
@@ -35,7 +36,7 @@ class EmailService {
     }
 
     // Si no hay configuración de SMTP, usar modo de prueba con Ethereal
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    if (!ENV.SMTP_USER || !ENV.SMTP_PASS) {
       console.warn("⚠️  No SMTP credentials found. Using Ethereal test account.");
 
       const testAccount = await nodemailer.createTestAccount();
@@ -93,7 +94,7 @@ class EmailService {
       const info = await transporter.sendMail(mailOptions);
 
       // Si es Ethereal (cuenta de prueba), mostrar URL de preview
-      if (info.messageId && process.env.NODE_ENV !== "production") {
+      if (info.messageId && ENV.NODE_ENV !== "production") {
         console.log("📧 Email sent:", info.messageId);
         const previewUrl = nodemailer.getTestMessageUrl(info);
         if (previewUrl) {
@@ -114,7 +115,7 @@ class EmailService {
     firstName: string,
     token: string
   ): Promise<void> {
-    const verificationUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email?token=${token}`;
+    const verificationUrl = `${ENV.FRONTEND_URL}/verify-email?token=${token}`;
 
     const html = this.getVerificationEmailTemplate(firstName, verificationUrl);
 
@@ -133,7 +134,7 @@ class EmailService {
     firstName: string,
     token: string
   ): Promise<void> {
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password?token=${token}`;
+    const resetUrl = `${ENV.FRONTEND_URL}/reset-password?token=${token}`;
 
     const html = this.getPasswordResetEmailTemplate(firstName, resetUrl);
 

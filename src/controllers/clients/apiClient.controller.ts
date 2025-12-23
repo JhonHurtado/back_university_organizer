@@ -10,9 +10,11 @@ import {
 } from "../../types/schemas/clients/apiClient.schemas";
 import { ZodError } from "zod";
 import {
-  sendError,
-  sendErrorValidation,
   sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendServerError,
+  sendValidationError,
 } from "@/utils/response/apiResponse";
 
 export async function create(req: Request, res: Response) {
@@ -20,9 +22,8 @@ export async function create(req: Request, res: Response) {
     const data = createApiClientSchema.parse(req.body);
     const client = await apiClientService.createApiClient(data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Cliente API creado exitosamente",
       data: {
         id: client.id,
@@ -42,16 +43,12 @@ export async function create(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors,
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al crear cliente",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al crear cliente",
     });
   }
 }
@@ -65,11 +62,7 @@ export async function getAll(_req: Request, res: Response) {
       data: clients,
     });
   } catch (error) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener clientes",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener clientes",
     });
   }
 }
@@ -80,11 +73,7 @@ export async function getById(req: Request, res: Response) {
     const client = await apiClientService.findApiClientById(id);
 
     if (!client) {
-      return sendError({
-        res,
-        code: 404,
-        message: "Cliente no encontrado",
-        error: "NOT_FOUND",
+      return sendNotFound({ res, message: "Cliente no encontrado",
       });
     }
 
@@ -110,13 +99,9 @@ export async function getById(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener cliente",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener cliente",
     });
   }
 }
@@ -149,13 +134,9 @@ export async function update(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al actualizar cliente",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al actualizar cliente",
     });
   }
 }
@@ -181,13 +162,9 @@ export async function regenerateSecret(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al regenerar secret",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al regenerar secret",
     });
   }
 }
@@ -209,13 +186,9 @@ export async function deactivate(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al desactivar cliente",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al desactivar cliente",
     });
   }
 }
@@ -237,13 +210,9 @@ export async function activate(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al activar cliente",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al activar cliente",
     });
   }
 }

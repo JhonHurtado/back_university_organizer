@@ -3,7 +3,12 @@
 // =====================================================
 import type { Request, Response } from "express";
 import { analyticsService } from "@/services/analytics/analytics.service";
-import { sendError, sendErrorValidation, sendSuccess } from "@/utils/response/apiResponse";
+import {
+  sendSuccess,
+  sendNotFound,
+  sendServerError,
+  sendValidationError,
+} from "@/utils/response/apiResponse";
 import { ZodError } from "zod";
 import * as analyticsSchemas from "@/types/schemas/analytics/analytics.schemas";
 
@@ -28,19 +33,15 @@ export async function getCareerStatistics(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
     if (error.message === "CAREER_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Carrera no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Carrera no encontrada" });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener estadísticas",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener estadísticas",
     });
   }
 }
@@ -62,19 +63,15 @@ export async function predictGPA(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
     if (error.message === "CAREER_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Carrera no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Carrera no encontrada" });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al predecir GPA",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al predecir GPA",
     });
   }
 }
@@ -103,19 +100,15 @@ export async function getSubjectRecommendations(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
     if (error.message === "CAREER_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Carrera no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Carrera no encontrada" });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener recomendaciones",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener recomendaciones",
     });
   }
 }
@@ -137,19 +130,15 @@ export async function analyzePerformanceByType(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
     if (error.message === "CAREER_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Carrera no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Carrera no encontrada" });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al analizar rendimiento",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al analizar rendimiento",
     });
   }
 }
@@ -171,19 +160,15 @@ export async function getPerformanceTrends(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
     if (error.message === "CAREER_NOT_FOUND") {
-      return sendError({ res, code: 404, message: "Carrera no encontrada", error: error.message });
+      return sendNotFound({ res, message: "Carrera no encontrada" });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener tendencias",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener tendencias",
     });
   }
 }

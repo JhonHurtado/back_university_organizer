@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { ENV } from "@/config/config";
 
 // Extender la interfaz global de Node
 declare global {
@@ -7,7 +8,7 @@ declare global {
 
 // Configuración de logging según el entorno
 const logConfig: Prisma.LogLevel[] =
-  process.env.NODE_ENV === "development"
+  ENV.NODE_ENV === "development"
     ? ["query", "info", "warn", "error"]
     : ["error"];
 
@@ -25,7 +26,7 @@ const createPrismaClient = (): PrismaClient => {
 export const database = globalThis.prisma ?? createPrismaClient();
 
 // Solo en desarrollo: guardar en global para hot-reload
-if (process.env.NODE_ENV !== "production") {
+if (ENV.NODE_ENV !== "production") {
   globalThis.prisma = database;
 }
 

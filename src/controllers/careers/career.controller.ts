@@ -12,9 +12,13 @@ import {
 } from "@/types/schemas/careers/career.schemas";
 import { ZodError } from "zod";
 import {
-  sendError,
-  sendErrorValidation,
   sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendBadRequest,
+  sendServerError,
+  sendValidationError,
+  sendUnauthorized,
 } from "@/utils/response/apiResponse";
 
 // =====================================================
@@ -25,20 +29,17 @@ export async function create(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
     const data = createCareerSchema.parse(req.body);
     const career = await careerService.create(userId, data);
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Carrera creada exitosamente",
       data: career,
     });
@@ -50,33 +51,27 @@ export async function create(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "INVALID_SEMESTER") {
-      return sendError({
+      return sendBadRequest({
         res,
-        code: 400,
         message: "El semestre actual no puede exceder el total de semestres",
-        error: "INVALID_SEMESTER",
       });
     }
 
     if (error.message === "INVALID_GRADE_RANGE") {
-      return sendError({
+      return sendBadRequest({
         res,
-        code: 400,
         message:
           "La nota mínima de aprobación debe ser menor que la nota máxima",
-        error: "INVALID_GRADE_RANGE",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al crear carrera",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -89,11 +84,9 @@ export async function getAll(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -113,14 +106,12 @@ export async function getAll(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al obtener carreras",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -133,11 +124,9 @@ export async function getById(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -145,11 +134,9 @@ export async function getById(req: Request, res: Response) {
     const career = await careerService.findById(id, userId);
 
     if (!career) {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Carrera no encontrada",
-        error: "NOT_FOUND",
       });
     }
 
@@ -166,14 +153,12 @@ export async function getById(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al obtener carrera",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -186,11 +171,9 @@ export async function update(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -212,42 +195,34 @@ export async function update(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "NOT_FOUND") {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Carrera no encontrada",
-        error: "NOT_FOUND",
       });
     }
 
     if (error.message === "INVALID_SEMESTER") {
-      return sendError({
+      return sendBadRequest({
         res,
-        code: 400,
         message: "El semestre actual no puede exceder el total de semestres",
-        error: "INVALID_SEMESTER",
       });
     }
 
     if (error.message === "INVALID_GRADE_RANGE") {
-      return sendError({
+      return sendBadRequest({
         res,
-        code: 400,
         message:
           "La nota mínima de aprobación debe ser menor que la nota máxima",
-        error: "INVALID_GRADE_RANGE",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al actualizar carrera",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -260,11 +235,9 @@ export async function updateSemester(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -290,32 +263,26 @@ export async function updateSemester(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "NOT_FOUND") {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Carrera no encontrada",
-        error: "NOT_FOUND",
       });
     }
 
     if (error.message === "INVALID_SEMESTER") {
-      return sendError({
+      return sendBadRequest({
         res,
-        code: 400,
         message: "El semestre no puede exceder el total de semestres",
-        error: "INVALID_SEMESTER",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al actualizar semestre",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -328,11 +295,9 @@ export async function softDelete(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -351,23 +316,19 @@ export async function softDelete(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "NOT_FOUND") {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Carrera no encontrada",
-        error: "NOT_FOUND",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al eliminar carrera",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -380,11 +341,9 @@ export async function restore(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -404,23 +363,19 @@ export async function restore(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "NOT_FOUND") {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Carrera no encontrada o no está eliminada",
-        error: "NOT_FOUND",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al restaurar carrera",
-      error: "SERVER_ERROR",
     });
   }
 }
@@ -433,11 +388,9 @@ export async function getStats(req: Request, res: Response) {
     const userId = req.user?.id;
 
     if (!userId) {
-      return sendError({
+      return sendUnauthorized({
         res,
-        code: 401,
         message: "No autenticado",
-        error: "UNAUTHORIZED",
       });
     }
 
@@ -457,23 +410,19 @@ export async function getStats(req: Request, res: Response) {
         return acc;
       }, {} as Record<string, string>);
 
-      return sendErrorValidation({ res, errors });
+      return sendValidationError({ res, errors });
     }
 
     if (error.message === "NOT_FOUND") {
-      return sendError({
+      return sendNotFound({
         res,
-        code: 404,
         message: "Carrera no encontrada",
-        error: "NOT_FOUND",
       });
     }
 
-    return sendError({
+    return sendServerError({
       res,
-      code: 500,
       message: "Error al obtener estadísticas",
-      error: "SERVER_ERROR",
     });
   }
 }

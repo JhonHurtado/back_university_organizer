@@ -3,7 +3,14 @@
 // =====================================================
 import type { Request, Response } from "express";
 import { activityLogService } from "@/services/activityLogs/activityLog.service";
-import { sendError, sendErrorValidation, sendSuccess } from "@/utils/response/apiResponse";
+import {
+  sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendBadRequest,
+  sendServerError,
+  sendValidationError,
+} from "@/utils/response/apiResponse";
 import { ZodError } from "zod";
 import * as activityLogSchemas from "@/types/schemas/activityLogs/activityLog.schemas";
 
@@ -29,24 +36,19 @@ export async function createActivityLog(req: Request, res: Response) {
       userAgent: data.userAgent || userAgent,
     });
 
-    return sendSuccess({
+    return sendCreated({
       res,
-      code: 201,
       message: "Log de actividad creado exitosamente",
       data: log,
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al crear log de actividad",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al crear log de actividad",
     });
   }
 }
@@ -67,16 +69,12 @@ export async function getActivityLogs(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener logs de actividad",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener logs de actividad",
     });
   }
 }
@@ -96,16 +94,12 @@ export async function getAllActivityLogs(req: Request, res: Response) {
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return sendErrorValidation({
+      return sendValidationError({
         res,
         errors: error.issues.reduce((acc, err) => ({ ...acc, [err.path.join(".")]: err.message }), {}),
       });
     }
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener logs de actividad",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener logs de actividad",
     });
   }
 }
@@ -120,11 +114,7 @@ export async function getActivityLogById(req: Request, res: Response) {
     const log = await activityLogService.getById(id, userId);
 
     if (!log) {
-      return sendError({
-        res,
-        code: 404,
-        message: "Log de actividad no encontrado",
-        error: "NOT_FOUND",
+      return sendNotFound({ res, message: "Log de actividad no encontrado",
       });
     }
 
@@ -134,11 +124,7 @@ export async function getActivityLogById(req: Request, res: Response) {
       data: log,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener log de actividad",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener log de actividad",
     });
   }
 }
@@ -152,11 +138,7 @@ export async function getActivityByEntity(req: Request, res: Response) {
     const { entity, entityId } = req.params;
 
     if (!entity || !entityId) {
-      return sendError({
-        res,
-        code: 400,
-        message: "Entity y entityId son requeridos",
-        error: "VALIDATION_ERROR",
+      return sendBadRequest({ res, message: "Entity y entityId son requeridos",
       });
     }
 
@@ -168,11 +150,7 @@ export async function getActivityByEntity(req: Request, res: Response) {
       data: logs,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener actividad de la entidad",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener actividad de la entidad",
     });
   }
 }
@@ -191,11 +169,7 @@ export async function getUserStats(req: Request, res: Response) {
       data: stats,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al obtener estadísticas de actividad",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al obtener estadísticas de actividad",
     });
   }
 }
@@ -209,11 +183,7 @@ export async function deleteOldLogs(req: Request, res: Response) {
     const daysOld = days ? parseInt(days as string) : 90;
 
     if (isNaN(daysOld) || daysOld < 1) {
-      return sendError({
-        res,
-        code: 400,
-        message: "El parámetro 'days' debe ser un número positivo",
-        error: "VALIDATION_ERROR",
+      return sendBadRequest({ res, message: "El parámetro 'days' debe ser un número positivo",
       });
     }
 
@@ -225,11 +195,7 @@ export async function deleteOldLogs(req: Request, res: Response) {
       data: result,
     });
   } catch (error: any) {
-    return sendError({
-      res,
-      code: 500,
-      message: "Error al eliminar logs antiguos",
-      error: "SERVER_ERROR",
+    return sendServerError({ res, message: "Error al eliminar logs antiguos",
     });
   }
 }

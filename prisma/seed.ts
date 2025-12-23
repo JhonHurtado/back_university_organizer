@@ -4,7 +4,7 @@
 // =====================================================
 
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -16,7 +16,7 @@ async function main() {
   // =====================================================
   console.log("\n📦 Creating API clients...");
 
-  const apiClient = await prisma.apiClient.create({
+  await prisma.apiClient.create({
     data: {
       name: "Web Application",
       clientId: "cli_web_app_12345",
@@ -28,7 +28,7 @@ async function main() {
     },
   });
 
-  const mobileClient = await prisma.apiClient.create({
+   await prisma.apiClient.create({
     data: {
       name: "Mobile App",
       clientId: "cli_mobile_app_54321",
@@ -110,7 +110,7 @@ async function main() {
     },
   });
 
-  const enterprisePlan = await prisma.plan.create({
+  await prisma.plan.create({
     data: {
       name: "Enterprise",
       slug: "enterprise",
@@ -151,7 +151,7 @@ async function main() {
   // =====================================================
   console.log("\n📋 Creating menu structure...");
 
-  const dashboardMenu = await prisma.menu.create({
+  await prisma.menu.create({
     data: {
       name: "dashboard",
       label: "Dashboard",
@@ -205,7 +205,7 @@ async function main() {
     },
   });
 
-  const analyticsMenu = await prisma.menu.create({
+  await prisma.menu.create({
     data: {
       name: "analytics",
       label: "Analytics",
@@ -257,7 +257,7 @@ async function main() {
     },
   });
 
-  const user3 = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: "mike.johnson@university.edu",
       password: hashedPassword,

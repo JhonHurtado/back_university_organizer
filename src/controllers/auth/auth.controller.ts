@@ -1,6 +1,16 @@
 import type { Request, Response, NextFunction } from "express";
 import passport from "../../config/auth/passport";
 import { AuthService } from "@/services/auth/auth.service";
+import { ENV } from "@/config/config";
+import {
+  sendSuccess,
+  sendCreated,
+  sendUnauthorized,
+  sendBadRequest,
+  sendConflict,
+  sendServerError,
+  ErrorCode,
+} from "@/utils/response/apiResponse";
 
 const authService = new AuthService();
 
@@ -13,13 +23,21 @@ export const register = async (
     "client-password",
     { session: false },
     async (err: any, client: any) => {
-      if (err || !client)
-        return res.status(401).json({ error: "invalid_client" });
+      if (err || !client) {
+        return sendUnauthorized({
+          res,
+          message: "Cliente no autorizado",
+          error: "INVALID_CLIENT",
+        });
+      }
 
       const { email, password, firstName, lastName } = req.body;
 
       if (!email || !password || !firstName || !lastName) {
-        return res.status(400).json({ error: "missing_fields" });
+        return sendBadRequest({
+          res,
+          message: "Todos los campos son requeridos",
+        });
       }
 
       try {
@@ -35,12 +53,22 @@ export const register = async (
           req.ip,
           req.headers["user-agent"]
         );
-        return res.status(201).json(response);
+        return sendCreated({
+          res,
+          data: response,
+          message: "Usuario registrado exitosamente",
+        });
       } catch (error: any) {
         if (error.message === "EMAIL_EXISTS") {
-          return res.status(409).json({ error: "email_exists" });
+          return sendConflict({
+            res,
+            message: "El email ya está registrado",
+          });
         }
-        return res.status(500).json({ error: "server_error" });
+        return sendServerError({
+          res,
+          message: "Error al registrar el usuario",
+        });
       }
     }
   )(req, res, next);
@@ -51,18 +79,31 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
     "client-password",
     { session: false },
     (err: any, client: any) => {
-      if (err || !client)
-        return res.status(401).json({ error: "invalid_client" });
+      if (err || !client) {
+        return sendUnauthorized({
+          res,
+          message: "Cliente no autorizado",
+          error: "INVALID_CLIENT",
+        });
+      }
 
       return passport.authenticate(
         "local",
         { session: false },
         async (err: any, user: any, info: any) => {
-          if (err) return res.status(500).json({ error: "server_error" });
-          if (!user)
-            return res
-              .status(401)
-              .json({ error: "invalid_credentials", message: info?.message });
+          if (err) {
+            return sendServerError({
+              res,
+              message: "Error al iniciar sesión",
+            });
+          }
+          if (!user) {
+            return sendUnauthorized({
+              res,
+              message: info?.message || "Credenciales inválidas",
+              error: ErrorCode.INVALID_CREDENTIALS,
+            });
+          }
 
           try {
             const response = await authService.buildAuthResponse(
@@ -71,9 +112,16 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
               req.ip,
               req.headers["user-agent"]
             );
-            return res.json(response);
+            return sendSuccess({
+              res,
+              data: response,
+              message: "Sesión iniciada exitosamente",
+            });
           } catch (error) {
-            return res.status(500).json({ error: "server_error" });
+            return sendServerError({
+              res,
+              message: "Error al iniciar sesión",
+            });
           }
         }
       )(req, res, next);
@@ -90,12 +138,21 @@ export const refresh = async (
     "client-password",
     { session: false },
     async (err: any, client: any) => {
-      if (err || !client)
-        return res.status(401).json({ error: "invalid_client" });
+      if (err || !client) {
+        return sendUnauthorized({
+          res,
+          message: "Cliente no autorizado",
+          error: "INVALID_CLIENT",
+        });
+      }
 
       const { refresh_token } = req.body;
-      if (!refresh_token)
-        return res.status(400).json({ error: "refresh_token_required" });
+      if (!refresh_token) {
+        return sendBadRequest({
+          res,
+          message: "El refresh token es requerido",
+        });
+      }
 
       try {
         const { accessToken, user, expiresIn } = await authService.refreshToken(
@@ -103,19 +160,27 @@ export const refresh = async (
           client.clientId
         );
 
-        return res.json({
-          access_token: accessToken,
-          refresh_token,
-          token_type: "Bearer",
-          expires_in: expiresIn,
-          user: {
-            id: user.id,
-            email: user.email,
-            fullName: `${user.firstName} ${user.lastName}`,
+        return sendSuccess({
+          res,
+          data: {
+            access_token: accessToken,
+            refresh_token,
+            token_type: "Bearer",
+            expires_in: expiresIn,
+            user: {
+              id: user.id,
+              email: user.email,
+              fullName: `${user.firstName} ${user.lastName}`,
+            },
           },
+          message: "Token renovado exitosamente",
         });
       } catch (error: any) {
-        return res.status(401).json({ error: "invalid_refresh_token" });
+        return sendUnauthorized({
+          res,
+          message: "Refresh token inválido o expirado",
+          error: "INVALID_REFRESH_TOKEN",
+        });
       }
     }
   )(req, res, next);
@@ -130,12 +195,21 @@ export const googleAuth = async (
     "client-password",
     { session: false },
     async (err: any, client: any) => {
-      if (err || !client)
-        return res.status(401).json({ error: "invalid_client" });
+      if (err || !client) {
+        return sendUnauthorized({
+          res,
+          message: "Cliente no autorizado",
+          error: "INVALID_CLIENT",
+        });
+      }
 
       const { id_token, access_token } = req.body;
-      if (!id_token && !access_token)
-        return res.status(400).json({ error: "token_required" });
+      if (!id_token && !access_token) {
+        return sendBadRequest({
+          res,
+          message: "Se requiere un token de Google",
+        });
+      }
 
       try {
         const googleData = await authService.verifyGoogleToken(
@@ -149,15 +223,30 @@ export const googleAuth = async (
           req.ip,
           req.headers["user-agent"]
         );
-        return res.json(response);
+        return sendSuccess({
+          res,
+          data: response,
+          message: "Autenticación con Google exitosa",
+        });
       } catch (error: any) {
         if (error.message === "INVALID_TOKEN") {
-          return res.status(401).json({ error: "invalid_token" });
+          return sendUnauthorized({
+            res,
+            message: "Token de Google inválido",
+            error: ErrorCode.INVALID_TOKEN,
+          });
         }
         if (error.message === "ACCOUNT_DISABLED") {
-          return res.status(401).json({ error: "account_disabled" });
+          return sendUnauthorized({
+            res,
+            message: "Cuenta deshabilitada",
+            error: ErrorCode.ACCOUNT_DISABLED,
+          });
         }
-        return res.status(401).json({ error: "authentication_failed" });
+        return sendUnauthorized({
+          res,
+          message: "Falló la autenticación con Google",
+        });
       }
     }
   )(req, res, next);
@@ -173,12 +262,12 @@ export const googleCallback = (
     { session: false },
     async (err: any, user: any) => {
       if (err || !user)
-        return res.redirect(`${process.env.FRONTEND_URL}/auth/error`);
+        return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
 
       try {
         const client = await authService.getDefaultClient();
         if (!client)
-          return res.redirect(`${process.env.FRONTEND_URL}/auth/error`);
+          return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
 
         const response = await authService.buildAuthResponse(
           user,
@@ -192,10 +281,10 @@ export const googleCallback = (
         });
 
         return res.redirect(
-          `${process.env.FRONTEND_URL}/auth/callback?${params}`
+          `${ENV.FRONTEND_URL}/auth/callback?${params}`
         );
       } catch (error) {
-        return res.redirect(`${process.env.FRONTEND_URL}/auth/error`);
+        return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
       }
     }
   )(req, res, next);
@@ -205,9 +294,16 @@ export const logout = async (req: Request, res: Response) => {
   try {
     const user = req.user as any;
     if (user?.sessionId) await authService.invalidateSession(user.sessionId);
-    return res.json({ message: "Sesión cerrada correctamente" });
+    return sendSuccess({
+      res,
+      data: null,
+      message: "Sesión cerrada correctamente",
+    });
   } catch (error) {
-    return res.status(500).json({ error: "server_error" });
+    return sendServerError({
+      res,
+      message: "Error al cerrar sesión",
+    });
   }
 };
 
@@ -215,26 +311,37 @@ export const logoutAll = async (req: Request, res: Response) => {
   try {
     const user = req.user as any;
     if (user?.id) await authService.invalidateAllSessions(user.id);
-    return res.json({ message: "Todas las sesiones cerradas" });
+    return sendSuccess({
+      res,
+      data: null,
+      message: "Todas las sesiones cerradas correctamente",
+    });
   } catch (error) {
-    return res.status(500).json({ error: "server_error" });
+    return sendServerError({
+      res,
+      message: "Error al cerrar sesiones",
+    });
   }
 };
 
 export const me = async (req: Request, res: Response) => {
   const user = req.user as any;
-  return res.json({
-    id: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    avatar: user.avatar,
-    emailVerified: user.emailVerified,
-    subscription: user.subscription
-      ? {
-          status: user.subscription.status,
-          plan: user.subscription.plan.name,
-        }
-      : null,
+  return sendSuccess({
+    res,
+    data: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar,
+      emailVerified: user.emailVerified,
+      subscription: user.subscription
+        ? {
+            status: user.subscription.status,
+            plan: user.subscription.plan.name,
+          }
+        : null,
+    },
+    message: "Información del usuario obtenida exitosamente",
   });
 };
