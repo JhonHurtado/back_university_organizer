@@ -394,9 +394,9 @@ export async function getStats(req: Request, res: Response) {
 // =====================================================
 export async function search(req: Request, res: Response) {
   try {
-    const { q, limit } = req.query;
+    const { query, limit } = req.query;
 
-    if (!q) {
+    if (!query) {
       return sendError({
         res,
         code: 400,
@@ -406,7 +406,7 @@ export async function search(req: Request, res: Response) {
     }
 
     const users = await userService.search(
-      q as string,
+      query as string,
       limit ? parseInt(limit as string) : undefined
     );
 

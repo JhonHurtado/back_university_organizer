@@ -1,0 +1,1958 @@
+{
+  "info": {
+    "name": "University Organizer API",
+    "description": "Complete API collection for the University Organizer Backend. Includes all 100+ endpoints across 13 modules.\n\n**Setup Instructions:**\n1. Import this collection into Postman\n2. Update the `baseUrl` variable with your server URL\n3. After logging in, copy the `accessToken` from the response and update the collection variable\n4. The Bearer token will be automatically applied to all authenticated requests\n\n**Environment Variables:**\n- `baseUrl`: API base URL (default: http://localhost:3000/api)\n- `accessToken`: JWT access token (obtained from login)\n- `refreshToken`: JWT refresh token (obtained from login)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\",\n  \"timezone\": \"America/New_York\",\n  \"language\": \"es\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.data.tokens.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.data.tokens.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.data.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Logout All Sessions",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout-all"]
+            }
+          }
+        },
+        {
+          "name": "Google OAuth",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjU5MmU0Y...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"phone\": \"+1234567890\",\n  \"timezone\": \"America/Los_Angeles\",\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/search?query=john&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "john"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "stats"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John Updated\",\n  \"lastName\": \"Doe Updated\",\n  \"phone\": \"+9876543210\",\n  \"timezone\": \"America/Chicago\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Password",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NewSecurePass456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId/password",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "password"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activate User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "activate"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "deactivate"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Restore User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "restore"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Careers",
+      "item": [
+        {
+          "name": "Create Career",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Computer Science\",\n  \"code\": \"CS-2024\",\n  \"university\": \"MIT\",\n  \"faculty\": \"Engineering\",\n  \"campus\": \"Main Campus\",\n  \"totalCredits\": 180,\n  \"totalSemesters\": 10,\n  \"currentSemester\": 1,\n  \"gradeScale\": \"FIVE\",\n  \"minPassingGrade\": 3.0,\n  \"maxGrade\": 5.0,\n  \"startDate\": \"2024-01-15T00:00:00Z\",\n  \"expectedEndDate\": \"2029-06-30T00:00:00Z\",\n  \"color\": \"#3B82F6\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/careers",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers"]
+            }
+          }
+        },
+        {
+          "name": "Get All Careers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/careers?status=ACTIVE&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Career by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/careers/:careerId",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers", ":careerId"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Career Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/careers/:careerId/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers", ":careerId", "stats"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Career",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Computer Science - Updated\",\n  \"currentSemester\": 2,\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/careers/:careerId",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers", ":careerId"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Current Semester",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentSemester\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/careers/:careerId/semester",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers", ":careerId", "semester"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Career",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/careers/:careerId",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers", ":careerId"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Restore Career",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/careers/:careerId/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["careers", ":careerId", "restore"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Academic",
+      "item": [
+        {
+          "name": "Semesters",
+          "item": [
+            {
+              "name": "Create Semester",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"careerId\": \"career-123\",\n  \"number\": 1,\n  \"name\": \"First Semester\",\n  \"description\": \"Introduction to Computer Science\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/semesters",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "semesters"]
+                }
+              }
+            },
+            {
+              "name": "Get Semesters by Career",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/careers/:careerId/semesters",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "careers", ":careerId", "semesters"],
+                  "variable": [
+                    {
+                      "key": "careerId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Semester by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/semesters/:semesterId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "semesters", ":semesterId"],
+                  "variable": [
+                    {
+                      "key": "semesterId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Semester",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"First Semester - Updated\",\n  \"description\": \"Updated description\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/semesters/:semesterId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "semesters", ":semesterId"],
+                  "variable": [
+                    {
+                      "key": "semesterId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Semester",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/semesters/:semesterId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "semesters", ":semesterId"],
+                  "variable": [
+                    {
+                      "key": "semesterId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subjects",
+          "item": [
+            {
+              "name": "Create Subject",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"careerId\": \"career-123\",\n  \"semesterId\": \"semester-123\",\n  \"code\": \"CS101\",\n  \"name\": \"Introduction to Programming\",\n  \"description\": \"Basic programming concepts\",\n  \"credits\": 4,\n  \"hoursPerWeek\": 6,\n  \"subjectType\": \"REQUIRED\",\n  \"area\": \"Computer Science\",\n  \"totalCuts\": 3,\n  \"isElective\": false,\n  \"gradeWeights\": {\n    \"exams\": 0.6,\n    \"homework\": 0.3,\n    \"participation\": 0.1\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/subjects",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "subjects"]
+                }
+              }
+            },
+            {
+              "name": "Get Subjects by Career",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/careers/:careerId/subjects?subjectType=REQUIRED",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "careers", ":careerId", "subjects"],
+                  "query": [
+                    {
+                      "key": "subjectType",
+                      "value": "REQUIRED"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "careerId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Subject by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "subjects", ":subjectId"],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Subject",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Introduction to Programming - Updated\",\n  \"credits\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "subjects", ":subjectId"],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Subject",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "subjects", ":subjectId"],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Prerequisite",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prerequisiteId\": \"subject-100\",\n  \"isStrict\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId/prerequisites",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "subjects", ":subjectId", "prerequisites"],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Remove Prerequisite",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId/prerequisites/:prerequisiteId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "subjects", ":subjectId", "prerequisites", ":prerequisiteId"],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": ""
+                    },
+                    {
+                      "key": "prerequisiteId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periods",
+          "item": [
+            {
+              "name": "Create Academic Period",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"careerId\": \"career-123\",\n  \"name\": \"2024-1\",\n  \"startDate\": \"2024-01-15T00:00:00Z\",\n  \"endDate\": \"2024-06-30T00:00:00Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/periods",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "periods"]
+                }
+              }
+            },
+            {
+              "name": "Get Periods by Career",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/careers/:careerId/periods",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "careers", ":careerId", "periods"],
+                  "variable": [
+                    {
+                      "key": "careerId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Current Period",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/careers/:careerId/periods/current",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "careers", ":careerId", "periods", "current"],
+                  "variable": [
+                    {
+                      "key": "careerId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enrollments",
+          "item": [
+            {
+              "name": "Enroll in Subject",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"careerId\": \"career-123\",\n  \"subjectId\": \"subject-123\",\n  \"periodId\": \"period-123\",\n  \"section\": \"A\",\n  \"classroom\": \"Room 301\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/enrollments",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "enrollments"]
+                }
+              }
+            },
+            {
+              "name": "Get Enrollments by Career",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/careers/:careerId/enrollments?status=ENROLLED",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "careers", ":careerId", "enrollments"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "ENROLLED"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "careerId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Enrollment by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/enrollments/:enrollmentId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "enrollments", ":enrollmentId"],
+                  "variable": [
+                    {
+                      "key": "enrollmentId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Enrollment",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"section\": \"B\",\n  \"classroom\": \"Room 305\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/academic/enrollments/:enrollmentId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "enrollments", ":enrollmentId"],
+                  "variable": [
+                    {
+                      "key": "enrollmentId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Withdraw Enrollment",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/academic/enrollments/:enrollmentId/withdraw",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["academic", "enrollments", ":enrollmentId", "withdraw"],
+                  "variable": [
+                    {
+                      "key": "enrollmentId",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Grades",
+      "item": [
+        {
+          "name": "Create Grade",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enrollmentId\": \"enrollment-123\",\n  \"cutNumber\": 1,\n  \"value\": 4.5,\n  \"weight\": 0.33,\n  \"gradeDate\": \"2024-03-15T00:00:00Z\",\n  \"observations\": \"Excellent work\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/grades/grades",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "grades"]
+            }
+          }
+        },
+        {
+          "name": "Get Grades by Enrollment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/grades/enrollments/:enrollmentId/grades",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "enrollments", ":enrollmentId", "grades"],
+              "variable": [
+                {
+                  "key": "enrollmentId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Grade",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 4.7,\n  \"observations\": \"Outstanding performance\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/grades/grades/:gradeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "grades", ":gradeId"],
+              "variable": [
+                {
+                  "key": "gradeId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Grade",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/grades/grades/:gradeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "grades", ":gradeId"],
+              "variable": [
+                {
+                  "key": "gradeId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Grade Item",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gradeId\": \"grade-123\",\n  \"name\": \"Midterm Exam\",\n  \"value\": 4.5,\n  \"weight\": 0.5,\n  \"maxValue\": 5.0,\n  \"gradeDate\": \"2024-03-15T00:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/grades/grade-items",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "grade-items"]
+            }
+          }
+        },
+        {
+          "name": "Update Grade Item",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 4.8,\n  \"weight\": 0.6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/grades/grade-items/:gradeItemId",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "grade-items", ":gradeItemId"],
+              "variable": [
+                {
+                  "key": "gradeItemId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Grade Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/grades/grade-items/:gradeItemId",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "grade-items", ":gradeItemId"],
+              "variable": [
+                {
+                  "key": "gradeItemId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Career GPA",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/grades/careers/:careerId/gpa",
+              "host": ["{{baseUrl}}"],
+              "path": ["grades", "careers", ":careerId", "gpa"],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedules",
+      "item": [
+        {
+          "name": "Create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enrollmentId\": \"enrollment-123\",\n  \"dayOfWeek\": 1,\n  \"startTime\": \"08:00\",\n  \"endTime\": \"10:00\",\n  \"location\": \"Room 301\",\n  \"scheduleType\": \"LECTURE\",\n  \"isRecurring\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedules",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedules"]
+            }
+          }
+        },
+        {
+          "name": "Get Schedules by Enrollment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/enrollments/:enrollmentId/schedules",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "enrollments", ":enrollmentId", "schedules"],
+              "variable": [
+                {
+                  "key": "enrollmentId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Weekly Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedules/weekly?careerId=career-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedules", "weekly"],
+              "query": [
+                {
+                  "key": "careerId",
+                  "value": "career-123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Schedule Conflicts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/careers/:careerId/schedules/conflicts?dayOfWeek=1&startTime=08:00&endTime=10:00",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "careers", ":careerId", "schedules", "conflicts"],
+              "query": [
+                {
+                  "key": "dayOfWeek",
+                  "value": "1"
+                },
+                {
+                  "key": "startTime",
+                  "value": "08:00"
+                },
+                {
+                  "key": "endTime",
+                  "value": "10:00"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "careerId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Schedule",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"09:00\",\n  \"endTime\": \"11:00\",\n  \"location\": \"Room 305\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedules/:scheduleId",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedules", ":scheduleId"],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedules/:scheduleId",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedules", ":scheduleId"],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Schedule Exception",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"schedule-123\",\n  \"exceptionDate\": \"2024-03-20T00:00:00Z\",\n  \"reason\": \"Holiday\",\n  \"isCancelled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedule-exceptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedule-exceptions"]
+            }
+          }
+        },
+        {
+          "name": "Update Schedule Exception",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"University Holiday\",\n  \"newStartTime\": \"10:00\",\n  \"newEndTime\": \"12:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedule-exceptions/:exceptionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedule-exceptions", ":exceptionId"],
+              "variable": [
+                {
+                  "key": "exceptionId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Schedule Exception",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/schedule-exceptions/:exceptionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedules", "schedule-exceptions", ":exceptionId"],
+              "variable": [
+                {
+                  "key": "exceptionId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Grade Posted\",\n  \"message\": \"Your grade for CS101 has been posted\",\n  \"type\": \"GRADE\",\n  \"priority\": \"MEDIUM\",\n  \"actionUrl\": \"/grades/123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=1&limit=20&unreadOnly=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "unreadOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread/count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread", "count"]
+            }
+          }
+        },
+        {
+          "name": "Get Notification by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId", "read"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Update Notification",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isRead\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete All Read",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Career Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/career/statistics?careerId=career-123&periodId=period-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "career", "statistics"],
+              "query": [
+                {
+                  "key": "careerId",
+                  "value": "career-123"
+                },
+                {
+                  "key": "periodId",
+                  "value": "period-123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Predict GPA",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"careerId\": \"career-123\",\n  \"targetGrades\": [\n    {\n      \"subjectId\": \"subject-150\",\n      \"grade\": 4.5,\n      \"credits\": 4\n    },\n    {\n      \"subjectId\": \"subject-151\",\n      \"grade\": 4.0,\n      \"credits\": 3\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/gpa/predict",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "gpa", "predict"]
+            }
+          }
+        },
+        {
+          "name": "Get Subject Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/subjects/recommendations?careerId=career-123&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "subjects", "recommendations"],
+              "query": [
+                {
+                  "key": "careerId",
+                  "value": "career-123"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analyze Performance by Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/performance/by-type?careerId=career-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "performance", "by-type"],
+              "query": [
+                {
+                  "key": "careerId",
+                  "value": "career-123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Performance Trends",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/performance/trends?careerId=career-123&periods=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "performance", "trends"],
+              "query": [
+                {
+                  "key": "careerId",
+                  "value": "career-123"
+                },
+                {
+                  "key": "periods",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verification",
+      "item": [
+        {
+          "name": "Verify Email",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/verification/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "verify-email"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/verification/resend-verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "resend-verification"]
+            }
+          }
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/verification/request-password-reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "request-password-reset"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"newPassword\": \"NewSecurePass456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/verification/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activity Logs",
+      "item": [
+        {
+          "name": "Get Activity Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs?page=1&limit=20&action=CREATE&entity=CAREER",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "action",
+                  "value": "CREATE"
+                },
+                {
+                  "key": "entity",
+                  "value": "CAREER"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get All Activity Logs (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/admin/all?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "admin", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Activity by Entity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/entity/:entity/:entityId",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "entity", ":entity", ":entityId"],
+              "variable": [
+                {
+                  "key": "entity",
+                  "value": "CAREER"
+                },
+                {
+                  "key": "entityId",
+                  "value": "career-123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Activity Log by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/:logId",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", ":logId"],
+              "variable": [
+                {
+                  "key": "logId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Activity Log (Manual)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"CUSTOM\",\n  \"entity\": \"OTHER\",\n  \"entityId\": \"custom-123\",\n  \"description\": \"Custom activity log\",\n  \"metadata\": {\n    \"customField\": \"value\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs"]
+            }
+          }
+        },
+        {
+          "name": "Delete Old Logs (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/admin/clean?days=90",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "admin", "clean"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "90"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
