@@ -1,0 +1,137 @@
+{
+  "@@locale": "es",
+
+  "appName": "Organizador Universitario",
+  "@appName": {
+    "description": "El nombre de la aplicación"
+  },
+
+  "welcome": "Bienvenido",
+  "login": "Iniciar Sesión",
+  "register": "Registrarse",
+  "logout": "Cerrar Sesión",
+  "email": "Correo Electrónico",
+  "password": "Contraseña",
+  "confirmPassword": "Confirmar Contraseña",
+  "firstName": "Nombre",
+  "lastName": "Apellido",
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "dontHaveAccount": "¿No tienes una cuenta?",
+  "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+  "continueWithGoogle": "Continuar con Google",
+
+  "home": "Inicio",
+  "dashboard": "Panel",
+  "profile": "Perfil",
+  "settings": "Configuración",
+  "preferences": "Preferencias",
+
+  "careers": "Carreras",
+  "career": "Carrera",
+  "addCareer": "Agregar Carrera",
+  "editCareer": "Editar Carrera",
+  "careerName": "Nombre de la Carrera",
+  "university": "Universidad",
+  "faculty": "Facultad",
+  "campus": "Campus",
+  "currentSemester": "Semestre Actual",
+
+  "subjects": "Materias",
+  "subject": "Materia",
+  "addSubject": "Agregar Materia",
+  "editSubject": "Editar Materia",
+  "subjectName": "Nombre de la Materia",
+  "subjectCode": "Código de la Materia",
+  "credits": "Créditos",
+  "hoursPerWeek": "Horas por Semana",
+
+  "grades": "Notas",
+  "grade": "Nota",
+  "addGrade": "Agregar Nota",
+  "editGrade": "Editar Nota",
+  "finalGrade": "Nota Final",
+  "cutNumber": "Corte {number}",
+  "@cutNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+
+  "schedule": "Horario",
+  "schedules": "Horarios",
+  "addSchedule": "Agregar Horario",
+  "editSchedule": "Editar Horario",
+  "monday": "Lunes",
+  "tuesday": "Martes",
+  "wednesday": "Miércoles",
+  "thursday": "Jueves",
+  "friday": "Viernes",
+  "saturday": "Sábado",
+  "sunday": "Domingo",
+
+  "professors": "Profesores",
+  "professor": "Profesor",
+  "addProfessor": "Agregar Profesor",
+  "editProfessor": "Editar Profesor",
+  "professorName": "Nombre del Profesor",
+  "office": "Oficina",
+  "phone": "Teléfono",
+
+  "notifications": "Notificaciones",
+  "notification": "Notificación",
+  "noNotifications": "No hay notificaciones",
+  "markAsRead": "Marcar como leído",
+  "markAllAsRead": "Marcar todas como leídas",
+
+  "analytics": "Analíticas",
+  "performance": "Rendimiento",
+  "gradeAnalytics": "Analíticas de Notas",
+  "gpa": "Promedio",
+  "average": "Promedio",
+
+  "subscription": "Suscripción",
+  "plans": "Planes",
+  "currentPlan": "Plan Actual",
+  "upgradePlan": "Mejorar Plan",
+  "payment": "Pago",
+
+  "calendar": "Calendario",
+  "events": "Eventos",
+  "addEvent": "Agregar Evento",
+
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "add": "Agregar",
+  "search": "Buscar",
+  "filter": "Filtrar",
+  "sort": "Ordenar",
+  "loading": "Cargando...",
+  "error": "Error",
+  "success": "Éxito",
+  "warning": "Advertencia",
+  "info": "Información",
+
+  "requiredField": "Este campo es requerido",
+  "invalidEmail": "Correo electrónico inválido",
+  "invalidPassword": "La contraseña debe tener al menos 8 caracteres",
+  "passwordMismatch": "Las contraseñas no coinciden",
+
+  "yes": "Sí",
+  "no": "No",
+  "ok": "OK",
+  "confirm": "Confirmar",
+  "close": "Cerrar",
+
+  "darkMode": "Modo Oscuro",
+  "language": "Idioma",
+  "about": "Acerca de",
+  "help": "Ayuda",
+  "version": "Versión",
+
+  "english": "Inglés",
+  "spanish": "Español"
+}

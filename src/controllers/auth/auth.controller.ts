@@ -261,13 +261,11 @@ export const googleCallback = (
     "google",
     { session: false },
     async (err: any, user: any) => {
-      if (err || !user)
-        return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
+      if (err || !user) return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
 
       try {
         const client = await authService.getDefaultClient();
-        if (!client)
-          return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
+        if (!client) return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
 
         const response = await authService.buildAuthResponse(
           user,
@@ -280,9 +278,7 @@ export const googleCallback = (
           refresh_token: response.refresh_token,
         });
 
-        return res.redirect(
-          `${ENV.FRONTEND_URL}/auth/callback?${params}`
-        );
+        return res.redirect(`${ENV.FRONTEND_URL}/auth/callback?${params}`);
       } catch (error) {
         return res.redirect(`${ENV.FRONTEND_URL}/auth/error`);
       }

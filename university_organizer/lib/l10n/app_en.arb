@@ -1,0 +1,137 @@
+{
+  "@@locale": "en",
+
+  "appName": "University Organizer",
+  "@appName": {
+    "description": "The application name"
+  },
+
+  "welcome": "Welcome",
+  "login": "Login",
+  "register": "Register",
+  "logout": "Logout",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "forgotPassword": "Forgot Password?",
+  "dontHaveAccount": "Don't have an account?",
+  "alreadyHaveAccount": "Already have an account?",
+  "continueWithGoogle": "Continue with Google",
+
+  "home": "Home",
+  "dashboard": "Dashboard",
+  "profile": "Profile",
+  "settings": "Settings",
+  "preferences": "Preferences",
+
+  "careers": "Careers",
+  "career": "Career",
+  "addCareer": "Add Career",
+  "editCareer": "Edit Career",
+  "careerName": "Career Name",
+  "university": "University",
+  "faculty": "Faculty",
+  "campus": "Campus",
+  "currentSemester": "Current Semester",
+
+  "subjects": "Subjects",
+  "subject": "Subject",
+  "addSubject": "Add Subject",
+  "editSubject": "Edit Subject",
+  "subjectName": "Subject Name",
+  "subjectCode": "Subject Code",
+  "credits": "Credits",
+  "hoursPerWeek": "Hours per Week",
+
+  "grades": "Grades",
+  "grade": "Grade",
+  "addGrade": "Add Grade",
+  "editGrade": "Edit Grade",
+  "finalGrade": "Final Grade",
+  "cutNumber": "Cut {number}",
+  "@cutNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+
+  "schedule": "Schedule",
+  "schedules": "Schedules",
+  "addSchedule": "Add Schedule",
+  "editSchedule": "Edit Schedule",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+
+  "professors": "Professors",
+  "professor": "Professor",
+  "addProfessor": "Add Professor",
+  "editProfessor": "Edit Professor",
+  "professorName": "Professor Name",
+  "office": "Office",
+  "phone": "Phone",
+
+  "notifications": "Notifications",
+  "notification": "Notification",
+  "noNotifications": "No notifications",
+  "markAsRead": "Mark as read",
+  "markAllAsRead": "Mark all as read",
+
+  "analytics": "Analytics",
+  "performance": "Performance",
+  "gradeAnalytics": "Grade Analytics",
+  "gpa": "GPA",
+  "average": "Average",
+
+  "subscription": "Subscription",
+  "plans": "Plans",
+  "currentPlan": "Current Plan",
+  "upgradePlan": "Upgrade Plan",
+  "payment": "Payment",
+
+  "calendar": "Calendar",
+  "events": "Events",
+  "addEvent": "Add Event",
+
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "add": "Add",
+  "search": "Search",
+  "filter": "Filter",
+  "sort": "Sort",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "warning": "Warning",
+  "info": "Info",
+
+  "requiredField": "This field is required",
+  "invalidEmail": "Invalid email address",
+  "invalidPassword": "Password must be at least 8 characters",
+  "passwordMismatch": "Passwords do not match",
+
+  "yes": "Yes",
+  "no": "No",
+  "ok": "OK",
+  "confirm": "Confirm",
+  "close": "Close",
+
+  "darkMode": "Dark Mode",
+  "language": "Language",
+  "about": "About",
+  "help": "Help",
+  "version": "Version",
+
+  "english": "English",
+  "spanish": "Spanish"
+}
