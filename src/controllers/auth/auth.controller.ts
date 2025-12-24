@@ -49,9 +49,7 @@ export const register = async (
         });
         const response = await authService.buildAuthResponse(
           user,
-          client.clientId,
-          req.ip,
-          req.headers["user-agent"]
+          client.clientId
         );
         return sendCreated({
           res,
@@ -108,9 +106,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
           try {
             const response = await authService.buildAuthResponse(
               user,
-              client.clientId,
-              req.ip,
-              req.headers["user-agent"]
+              client.clientId
             );
             return sendSuccess({
               res,
@@ -155,7 +151,7 @@ export const refresh = async (
       }
 
       try {
-        const { accessToken, user, expiresIn } = await authService.refreshToken(
+        const { accessToken, refreshToken, user, expiresIn } = await authService.refreshToken(
           refresh_token,
           client.clientId
         );
@@ -164,7 +160,7 @@ export const refresh = async (
           res,
           data: {
             access_token: accessToken,
-            refresh_token,
+            refresh_token: refreshToken, // Nuevo refresh token (rotación)
             token_type: "Bearer",
             expires_in: expiresIn,
             user: {
@@ -219,9 +215,7 @@ export const googleAuth = async (
         const user = await authService.findOrCreateGoogleUser(googleData);
         const response = await authService.buildAuthResponse(
           user,
-          client.clientId,
-          req.ip,
-          req.headers["user-agent"]
+          client.clientId
         );
         return sendSuccess({
           res,
@@ -269,9 +263,7 @@ export const googleCallback = (
 
         const response = await authService.buildAuthResponse(
           user,
-          client.clientId,
-          req.ip,
-          req.headers["user-agent"]
+          client.clientId
         );
         const params = new URLSearchParams({
           access_token: response.access_token,

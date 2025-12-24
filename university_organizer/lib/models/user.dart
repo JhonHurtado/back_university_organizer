@@ -8,22 +8,26 @@ class User {
   final String id;
   final String email;
 
+  // Backend returns fullName in login, but first_name/last_name in profile
+  @JsonKey(name: 'fullName')
+  final String? fullNameFromBackend;
+
   @JsonKey(name: 'first_name')
-  final String firstName;
+  final String? firstName;
 
   @JsonKey(name: 'last_name')
-  final String lastName;
+  final String? lastName;
 
   final String? phone;
   final String? avatar;
-  final String timezone;
-  final String language;
+  final String? timezone;
+  final String? language;
 
   @JsonKey(name: 'is_active')
-  final bool isActive;
+  final bool? isActive;
 
   @JsonKey(name: 'email_verified')
-  final bool emailVerified;
+  final bool? emailVerified;
 
   @JsonKey(name: 'email_verified_at')
   final DateTime? emailVerifiedAt;
@@ -32,10 +36,10 @@ class User {
   final DateTime? lastLoginAt;
 
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   @JsonKey(name: 'deleted_at')
   final DateTime? deletedAt;
@@ -43,28 +47,45 @@ class User {
   User({
     required this.id,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    this.fullNameFromBackend,
+    this.firstName,
+    this.lastName,
     this.phone,
     this.avatar,
-    this.timezone = 'America/Bogota',
-    this.language = 'es',
-    this.isActive = true,
-    this.emailVerified = false,
+    this.timezone,
+    this.language,
+    this.isActive,
+    this.emailVerified,
     this.emailVerifiedAt,
     this.lastLoginAt,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
   });
 
-  /// Get full name
-  String get fullName => '$firstName $lastName';
+  /// Get full name (prefer fullNameFromBackend, fallback to firstName + lastName)
+  String get fullName {
+    if (fullNameFromBackend != null && fullNameFromBackend!.isNotEmpty) {
+      return fullNameFromBackend!;
+    }
+    return '${firstName ?? ''} ${lastName ?? ''}'.trim();
+  }
 
   /// Get initials
   String get initials {
-    final first = firstName.isNotEmpty ? firstName[0] : '';
-    final last = lastName.isNotEmpty ? lastName[0] : '';
+    // If we have fullNameFromBackend, split it
+    if (fullNameFromBackend != null && fullNameFromBackend!.isNotEmpty) {
+      final parts = fullNameFromBackend!.trim().split(' ');
+      if (parts.length >= 2) {
+        return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+      } else if (parts.length == 1 && parts[0].isNotEmpty) {
+        return parts[0][0].toUpperCase();
+      }
+    }
+
+    // Fallback to firstName/lastName
+    final first = (firstName != null && firstName!.isNotEmpty) ? firstName![0] : '';
+    final last = (lastName != null && lastName!.isNotEmpty) ? lastName![0] : '';
     return '$first$last'.toUpperCase();
   }
 

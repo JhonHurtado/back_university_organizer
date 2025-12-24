@@ -1,13 +1,17 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import { ENV } from "@/config/config";
 import database from "@/lib/prisma/prisma";
 import type { GoogleTokenPayload } from "@/types/jwt/JWT.types";
-import crypto from "crypto";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { createEmailVerificationToken } from "@/services/verification/verificationToken.service";
 import { emailService } from "@/services/email/email.service";
+import {
+  buildAuthResponse,
+  invalidateSession,
+  invalidateAllSessions,
+  refreshAccessToken,
+} from "@/config/auth/token.service";
 
 const googleClient = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
 
@@ -61,125 +65,31 @@ export class AuthService {
   }
 
   // =====================================================
-  // Crear sesión y tokens
+  // Construir respuesta de autenticación (delegado)
   // =====================================================
-  async createSession(
-    userId: string,
-    clientId: string,
-    ipAddress?: string,
-    userAgent?: string
-  ) {
-    try {
-      // Generar tokens ANTES de crear la sesión
-      const sessionId = crypto.randomUUID();
-
-      const accessToken = jwt.sign(
-        { sub: userId, sessionId, clientId },
-        ENV.JWT_SECRET,
-        { expiresIn: "15m", issuer: ENV.JWT_ISSUER }
-      );
-
-      const refreshToken = jwt.sign(
-        { sub: userId, sessionId, type: "refresh" },
-        ENV.JWT_SECRET,
-        { expiresIn: "7d", issuer: ENV.JWT_ISSUER }
-      );
-
-      // Crear sesión con tokens ya generados
-      await database.session.create({
-        data: {
-          id: sessionId,
-          userId,
-          token: accessToken,
-          refreshToken,
-          expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-          ipAddress,
-          userAgent,
-        },
-      });
-
-      return { accessToken, refreshToken, expiresIn: 900 };
-    } catch (error) {
-      console.error("AuthService.createSession error:", error);
-      throw error;
-    }
+  async buildAuthResponse(user: User, clientId: string) {
+    return buildAuthResponse(user, clientId);
   }
 
   // =====================================================
-  // Refresh Token
+  // Refresh Token (delegado)
   // =====================================================
   async refreshToken(refreshToken: string, clientId: string) {
-    try {
-      const decoded = jwt.verify(refreshToken, ENV.JWT_SECRET, {
-        algorithms: ["HS256"],
-        issuer: ENV.JWT_ISSUER,
-      }) as any;
-
-      if (decoded.type !== "refresh") throw new Error("INVALID_TOKEN");
-
-      const session = await database.session.findUnique({
-        where: { refreshToken },
-        include: {
-          user: { include: { subscription: { include: { plan: true } } } },
-        },
-      });
-
-      if (!session?.isValid || new Date() > session.expiresAt) {
-        throw new Error("INVALID_SESSION");
-      }
-
-      const user = session.user;
-      if (!user.isActive || user.deletedAt) throw new Error("USER_DISABLED");
-
-      const accessToken = jwt.sign(
-        { sub: user.id, sessionId: session.id, clientId },
-        ENV.JWT_SECRET,
-        { expiresIn: "15m", issuer: ENV.JWT_ISSUER }
-      );
-
-      await database.session.update({
-        where: { id: session.id },
-        data: {
-          token: accessToken,
-          expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-        },
-      });
-
-      return { accessToken, user, expiresIn: 900 };
-    } catch (error) {
-      console.error("AuthService.refreshToken error:", error);
-      throw error;
-    }
+    return refreshAccessToken(refreshToken, clientId);
   }
 
   // =====================================================
-  // Invalidar sesión
+  // Invalidar sesión (delegado)
   // =====================================================
   async invalidateSession(sessionId: string) {
-    try {
-      return await database.session.update({
-        where: { id: sessionId },
-        data: { isValid: false },
-      });
-    } catch (error) {
-      console.error("AuthService.invalidateSession error:", error);
-      throw error;
-    }
+    return invalidateSession(sessionId);
   }
 
   // =====================================================
-  // Invalidar todas las sesiones
+  // Invalidar todas las sesiones (delegado)
   // =====================================================
   async invalidateAllSessions(userId: string) {
-    try {
-      return await database.session.updateMany({
-        where: { userId, isValid: true },
-        data: { isValid: false },
-      });
-    } catch (error) {
-      console.error("AuthService.invalidateAllSessions error:", error);
-      throw error;
-    }
+    return invalidateAllSessions(userId);
   }
 
   // =====================================================
@@ -325,42 +235,6 @@ export class AuthService {
       });
     } catch (error) {
       console.error("AuthService.updateLastLogin error:", error);
-      throw error;
-    }
-  }
-
-  // =====================================================
-  // Construir respuesta de autenticación
-  // =====================================================
-  async buildAuthResponse(
-    user: User,
-    clientId: string,
-    ipAddress?: string,
-    userAgent?: string
-  ) {
-    try {
-      const { accessToken, refreshToken, expiresIn } = await this.createSession(
-        user.id,
-        clientId,
-        ipAddress,
-        userAgent
-      );
-
-      await this.updateLastLogin(user.id);
-
-      return {
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        token_type: "Bearer",
-        expires_in: expiresIn,
-        user: {
-          id: user.id,
-          email: user.email,
-          fullName: `${user.firstName} ${user.lastName}`,
-        },
-      };
-    } catch (error) {
-      console.error("AuthService.buildAuthResponse error:", error);
       throw error;
     }
   }

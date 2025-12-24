@@ -13,6 +13,8 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
       return res.status(500).json({ error: "server_error" });
     }
 
+    console.log(user);
+
     if (!user) {
       return res.status(401).json({ error: "unauthorized" });
     }

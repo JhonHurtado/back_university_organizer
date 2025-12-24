@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
+import '../../services/auth_service.dart';
+import '../../services/api_client.dart';
+import '../../providers/auth_provider.dart';
 
 /// Registration screen for new users
 class RegisterScreen extends StatefulWidget {
@@ -38,8 +42,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual registration logic with API
-      await Future.delayed(const Duration(seconds: 2));
+      final authService = AuthService(ApiClient());
+      final authResponse = await authService.register(
+        email: _emailController.text,
+        password: _passwordController.text,
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+      );
+
+      if (!mounted) return;
+
+      // Save auth data to provider
+      await context.read<AuthProvider>().setAuthData(
+            accessToken: authResponse.accessToken,
+            refreshToken: authResponse.refreshToken,
+            user: authResponse.user,
+          );
 
       if (!mounted) return;
 
@@ -48,8 +66,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SnackBar(content: Text('Registration successful!')),
       );
 
-      // Navigate to login
-      context.go(AppRoutes.login);
+      // Navigate to home
+      context.go(AppRoutes.home);
     } catch (e) {
       if (!mounted) return;
 

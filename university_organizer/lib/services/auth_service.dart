@@ -16,10 +16,13 @@ class AuthResponse {
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    // El backend retorna { success, message, data: { access_token, refresh_token, user } }
+    final data = json['data'] ?? json;
+
     return AuthResponse(
-      accessToken: json['access_token'] ?? json['accessToken'] ?? '',
-      refreshToken: json['refresh_token'] ?? json['refreshToken'] ?? '',
-      user: User.fromJson(json['user']),
+      accessToken: data['access_token'] ?? data['accessToken'] ?? '',
+      refreshToken: data['refresh_token'] ?? data['refreshToken'] ?? '',
+      user: User.fromJson(data['user']),
     );
   }
 }
@@ -76,6 +79,8 @@ class AuthService {
           'first_name': firstName,
           'last_name': lastName,
           if (phone != null) 'phone': phone,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
         },
       );
 
@@ -97,7 +102,11 @@ class AuthService {
     try {
       final response = await _apiClient.post(
         '/auth/google',
-        data: {'id_token': idToken},
+        data: {
+          'id_token': idToken,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
       );
 
       if (response.data == null) {
@@ -118,7 +127,11 @@ class AuthService {
     try {
       final response = await _apiClient.post(
         '/auth/refresh',
-        data: {'refresh_token': refreshToken},
+        data: {
+          'refresh_token': refreshToken,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
       );
 
       if (response.data == null) {
@@ -137,7 +150,13 @@ class AuthService {
   /// Logout
   Future<void> logout() async {
     try {
-      await _apiClient.post('/auth/logout');
+      await _apiClient.post(
+        '/auth/logout',
+        data: {
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
+      );
     } catch (e) {
       // Ignore logout errors
     }
@@ -146,7 +165,14 @@ class AuthService {
   /// Request password reset
   Future<void> requestPasswordReset({required String email}) async {
     try {
-      await _apiClient.post('/auth/forgot-password', data: {'email': email});
+      await _apiClient.post(
+        '/auth/forgot-password',
+        data: {
+          'email': email,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
+      );
     } catch (e) {
       rethrow;
     }
@@ -160,7 +186,12 @@ class AuthService {
     try {
       await _apiClient.post(
         '/auth/reset-password',
-        data: {'token': token, 'password': newPassword},
+        data: {
+          'token': token,
+          'password': newPassword,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
       );
     } catch (e) {
       rethrow;
@@ -170,7 +201,14 @@ class AuthService {
   /// Verify email with token
   Future<void> verifyEmail({required String token}) async {
     try {
-      await _apiClient.post('/auth/verify-email', data: {'token': token});
+      await _apiClient.post(
+        '/auth/verify-email',
+        data: {
+          'token': token,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
+      );
     } catch (e) {
       rethrow;
     }
@@ -179,7 +217,13 @@ class AuthService {
   /// Resend verification email
   Future<void> resendVerificationEmail() async {
     try {
-      await _apiClient.post('/auth/resend-verification');
+      await _apiClient.post(
+        '/auth/resend-verification',
+        data: {
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
+        },
+      );
     } catch (e) {
       rethrow;
     }
@@ -249,6 +293,8 @@ class AuthService {
         data: {
           'current_password': currentPassword,
           'new_password': newPassword,
+          'client_id': AppConstants.oauthClientId,
+          'client_secret': AppConstants.oauthClientSecret,
         },
       );
     } catch (e) {

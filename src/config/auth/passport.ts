@@ -8,10 +8,9 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as ClientPasswordStrategy } from "passport-oauth2-client-password";
 import { timingSafeEqual } from "crypto";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { ENV } from "../config";
-import type { JWTPayload } from "@/types/jwt/JWT.types";
 import database from "@/lib/prisma/prisma";
+import { verifyAccessToken } from "./token.service";
 
 // =====================================================
 // UTILS
@@ -95,21 +94,10 @@ passport.use(
   "bearer",
   new BearerStrategy(async (token, done) => {
     try {
-      const decoded = jwt.verify(token, ENV.JWT_SECRET, {
-        algorithms: ["HS256"],
-        issuer: ENV.JWT_ISSUER,
-      }) as JWTPayload;
+      // Usar el servicio centralizado de validación de tokens
+      const decoded = await verifyAccessToken(token);
 
-      if (decoded.sessionId) {
-        const session = await database.session.findUnique({
-          where: { id: decoded.sessionId },
-        });
-
-        if (!session?.isValid || new Date() > session.expiresAt) {
-          return done(null, false);
-        }
-      }
-
+      // Obtener usuario completo con subscription
       const user = await database.user.findUnique({
         where: { id: decoded.sub },
         include: { subscription: { include: { plan: true } } },
@@ -120,7 +108,9 @@ passport.use(
       }
 
       return done(null, { ...user, sessionId: decoded.sessionId });
-    } catch (error) {
+    } catch (error: any) {
+      // Errores específicos de token
+      console.error("Bearer token validation failed:", error.message);
       return done(null, false);
     }
   })

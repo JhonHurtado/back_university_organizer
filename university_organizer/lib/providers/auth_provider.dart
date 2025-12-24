@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/user.dart';
+import 'dart:convert';
 
 /// Authentication state enum
 enum AuthState {
@@ -13,17 +15,14 @@ enum AuthState {
 class AuthProvider extends ChangeNotifier {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
-  static const String _userIdKey = 'user_id';
-  static const String _userEmailKey = 'user_email';
+  static const String _userKey = 'user_data';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   AuthState _authState = AuthState.initial;
   String? _accessToken;
   String? _refreshToken;
-  String? _userId;
-  String? _userEmail;
-  String? _userName;
+  User? _user;
 
   // Getters
   AuthState get authState => _authState;
@@ -31,9 +30,10 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _authState == AuthState.loading;
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
-  String? get userId => _userId;
-  String? get userEmail => _userEmail;
-  String? get userName => _userName;
+  User? get currentUser => _user;
+  String? get userId => _user?.id;
+  String? get userEmail => _user?.email;
+  String? get userName => _user?.fullName;
 
   /// Initialize authentication state from secure storage
   Future<void> initialize() async {
@@ -43,10 +43,13 @@ class AuthProvider extends ChangeNotifier {
     try {
       _accessToken = await _secureStorage.read(key: _accessTokenKey);
       _refreshToken = await _secureStorage.read(key: _refreshTokenKey);
-      _userId = await _secureStorage.read(key: _userIdKey);
-      _userEmail = await _secureStorage.read(key: _userEmailKey);
+      final userData = await _secureStorage.read(key: _userKey);
 
-      if (_accessToken != null && _userId != null) {
+      if (userData != null) {
+        _user = User.fromJson(jsonDecode(userData));
+      }
+
+      if (_accessToken != null && _user != null) {
         _authState = AuthState.authenticated;
       } else {
         _authState = AuthState.unauthenticated;
@@ -63,26 +66,18 @@ class AuthProvider extends ChangeNotifier {
   Future<void> setAuthData({
     required String accessToken,
     required String refreshToken,
-    required String userId,
-    String? email,
-    String? name,
+    required User user,
   }) async {
     try {
       // Store in secure storage
       await _secureStorage.write(key: _accessTokenKey, value: accessToken);
       await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
-      await _secureStorage.write(key: _userIdKey, value: userId);
-
-      if (email != null) {
-        await _secureStorage.write(key: _userEmailKey, value: email);
-      }
+      await _secureStorage.write(key: _userKey, value: jsonEncode(user.toJson()));
 
       // Update state
       _accessToken = accessToken;
       _refreshToken = refreshToken;
-      _userId = userId;
-      _userEmail = email;
-      _userName = name;
+      _user = user;
       _authState = AuthState.authenticated;
 
       notifyListeners();
@@ -108,15 +103,12 @@ class AuthProvider extends ChangeNotifier {
       // Clear secure storage
       await _secureStorage.delete(key: _accessTokenKey);
       await _secureStorage.delete(key: _refreshTokenKey);
-      await _secureStorage.delete(key: _userIdKey);
-      await _secureStorage.delete(key: _userEmailKey);
+      await _secureStorage.delete(key: _userKey);
 
       // Clear state
       _accessToken = null;
       _refreshToken = null;
-      _userId = null;
-      _userEmail = null;
-      _userName = null;
+      _user = null;
       _authState = AuthState.unauthenticated;
 
       notifyListeners();

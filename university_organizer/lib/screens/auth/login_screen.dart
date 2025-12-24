@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
+import '../../services/auth_service.dart';
+import '../../services/api_client.dart';
+import '../../providers/auth_provider.dart';
 
 /// Login screen for user authentication
 class LoginScreen extends StatefulWidget {
@@ -31,8 +35,20 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual login logic with API
-      await Future.delayed(const Duration(seconds: 2));
+      final authService = AuthService(ApiClient());
+      final authResponse = await authService.login(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      // Save auth data to provider
+      await context.read<AuthProvider>().setAuthData(
+            accessToken: authResponse.accessToken,
+            refreshToken: authResponse.refreshToken,
+            user: authResponse.user,
+          );
 
       if (!mounted) return;
 

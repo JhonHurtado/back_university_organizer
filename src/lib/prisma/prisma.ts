@@ -9,7 +9,7 @@ declare global {
 // Configuración de logging según el entorno
 const logConfig: Prisma.LogLevel[] =
   ENV.NODE_ENV === "development"
-    ? ["query", "info", "warn", "error"]
+    ? [ "info", "warn", "error"]
     : ["error"];
 
 // Crear instancia de Prisma con configuración
