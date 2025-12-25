@@ -213,8 +213,10 @@ class CareerProvider extends ChangeNotifier {
   /// Update current semester
   Future<void> updateCurrentSemester(String id, int semester) async {
     try {
-      final updatedCareer =
-          await _careerService.updateCurrentSemester(id, semester);
+      await _careerService.updateCurrentSemester(id, semester);
+
+      // Reload the career after updating
+      final updatedCareer = await _careerService.getCareer(id);
 
       final index = _careers.indexWhere((c) => c.id == id);
       if (index != -1) {

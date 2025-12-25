@@ -13,6 +13,8 @@ class ApiClient {
     String? baseUrl,
     String? accessToken,
   }) {
+    print('ApiClient initialized with baseUrl: ${baseUrl ?? AppConstants.apiBaseUrl}');
+    print('Access Token: $accessToken');
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
@@ -21,6 +23,7 @@ class ApiClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          if (accessToken != null) 'Authorization': 'Bearer $accessToken',
         },
       ),
     );

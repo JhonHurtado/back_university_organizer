@@ -6,6 +6,7 @@ import '../../constants/app_routes.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/career_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../services/api_client.dart';
 import '../careers/careers_list_screen.dart';
 
 /// Home screen - Main dashboard of the app
@@ -498,7 +499,9 @@ class ProfileTab extends StatelessWidget {
                       );
 
                       if (confirm == true && context.mounted) {
+                        final apiClient = context.read<ApiClient>();
                         await authProvider.logout();
+                        apiClient.clearToken();
                         if (context.mounted) {
                           context.go(AppRoutes.login);
                         }

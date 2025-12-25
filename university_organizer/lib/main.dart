@@ -60,13 +60,19 @@ class MyApp extends StatelessWidget {
         ),
 
         // API Client - create once and share
-        Provider(
-          create: (_) => ApiClient(),
+        // Initialize with token from AuthProvider
+        ProxyProvider<AuthProvider, ApiClient>(
+          update: (_, authProvider, previous) {
+            final apiClient = previous ?? ApiClient();
+            // Update token whenever AuthProvider changes
+            apiClient.updateToken(authProvider.accessToken);
+            return apiClient;
+          },
         ),
 
         // Service providers
         ProxyProvider<ApiClient, CareerService>(
-          update: (_, apiClient, _) => CareerService(apiClient),
+          update: (_, apiClient, __) => CareerService(apiClient),
         ),
 
         // Data providers

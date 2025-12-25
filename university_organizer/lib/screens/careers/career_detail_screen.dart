@@ -372,11 +372,12 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
                             value: career.campus ?? 'Not specified',
                           ),
                           const Divider(height: 24),
-                          _InfoRow(
-                            icon: Icons.event,
-                            label: 'Start Date',
-                            value: DateFormat('MMM dd, yyyy').format(career.startDate),
-                          ),
+                          if (career.startDate != null)
+                            _InfoRow(
+                              icon: Icons.event,
+                              label: 'Start Date',
+                              value: DateFormat('MMM dd, yyyy').format(career.startDate!),
+                            ),
                           if (career.expectedEndDate != null) ...[
                             const Divider(height: 24),
                             _InfoRow(

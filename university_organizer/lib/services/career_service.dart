@@ -9,9 +9,22 @@ class CareerService {
   CareerService(this._apiClient);
 
   /// Get all careers for the current user
-  Future<List<Career>> getCareers() async {
+  Future<List<Career>> getCareers({
+    String? status,
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
-      final response = await _apiClient.get('/careers');
+      final queryParameters = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+        if (status != null) 'status': status,
+      };
+
+      final response = await _apiClient.get(
+        '/careers',
+        queryParameters: queryParameters,
+      );
 
       if (response.data == null) {
         throw ApiException(
@@ -20,11 +33,10 @@ class CareerService {
         );
       }
 
-      final List<dynamic> data = response.data is List
-          ? response.data
-          : response.data['data'] ?? [];
+      final data = response.data['data'] ?? response.data;
+      final List<dynamic> careers = data['careers'] ?? data;
 
-      return data.map((json) => Career.fromJson(json)).toList();
+      return careers.map((json) => Career.fromJson(json)).toList();
     } catch (e) {
       rethrow;
     }
@@ -42,7 +54,8 @@ class CareerService {
         );
       }
 
-      return Career.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return Career.fromJson(data);
     } catch (e) {
       rethrow;
     }
@@ -58,11 +71,13 @@ class CareerService {
     String? code,
     String? faculty,
     String? campus,
+    int currentSemester = 1,
     GradeScale gradeScale = GradeScale.five,
     double minPassingGrade = 3.0,
     double maxGrade = 5.0,
     DateTime? expectedEndDate,
     String? color,
+    String status = 'ACTIVE',
   }) async {
     try {
       final response = await _apiClient.post(
@@ -70,18 +85,20 @@ class CareerService {
         data: {
           'name': name,
           'university': university,
-          'total_credits': totalCredits,
-          'total_semesters': totalSemesters,
-          'start_date': startDate.toIso8601String(),
+          'totalCredits': totalCredits,
+          'totalSemesters': totalSemesters,
+          'currentSemester': currentSemester,
+          'startDate': startDate.toIso8601String(),
           if (code != null) 'code': code,
           if (faculty != null) 'faculty': faculty,
           if (campus != null) 'campus': campus,
-          'grade_scale': gradeScale.name.toUpperCase(),
-          'min_passing_grade': minPassingGrade,
-          'max_grade': maxGrade,
+          'gradeScale': gradeScale.name.toUpperCase(),
+          'minPassingGrade': minPassingGrade,
+          'maxGrade': maxGrade,
           if (expectedEndDate != null)
-            'expected_end_date': expectedEndDate.toIso8601String(),
+            'expectedEndDate': expectedEndDate.toIso8601String(),
           if (color != null) 'color': color,
+          'status': status,
         },
       );
 
@@ -92,7 +109,8 @@ class CareerService {
         );
       }
 
-      return Career.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return Career.fromJson(data);
     } catch (e) {
       rethrow;
     }
@@ -119,7 +137,7 @@ class CareerService {
     String? color,
   }) async {
     try {
-      final response = await _apiClient.patch(
+      final response = await _apiClient.put(
         '/careers/$id',
         data: {
           if (name != null) 'name': name,
@@ -127,18 +145,18 @@ class CareerService {
           if (university != null) 'university': university,
           if (faculty != null) 'faculty': faculty,
           if (campus != null) 'campus': campus,
-          if (totalCredits != null) 'total_credits': totalCredits,
-          if (totalSemesters != null) 'total_semesters': totalSemesters,
-          if (currentSemester != null) 'current_semester': currentSemester,
+          if (totalCredits != null) 'totalCredits': totalCredits,
+          if (totalSemesters != null) 'totalSemesters': totalSemesters,
+          if (currentSemester != null) 'currentSemester': currentSemester,
           if (gradeScale != null)
-            'grade_scale': gradeScale.name.toUpperCase(),
-          if (minPassingGrade != null) 'min_passing_grade': minPassingGrade,
-          if (maxGrade != null) 'max_grade': maxGrade,
-          if (startDate != null) 'start_date': startDate.toIso8601String(),
+            'gradeScale': gradeScale.name.toUpperCase(),
+          if (minPassingGrade != null) 'minPassingGrade': minPassingGrade,
+          if (maxGrade != null) 'maxGrade': maxGrade,
+          if (startDate != null) 'startDate': startDate.toIso8601String(),
           if (expectedEndDate != null)
-            'expected_end_date': expectedEndDate.toIso8601String(),
+            'expectedEndDate': expectedEndDate.toIso8601String(),
           if (actualEndDate != null)
-            'actual_end_date': actualEndDate.toIso8601String(),
+            'actualEndDate': actualEndDate.toIso8601String(),
           if (status != null) 'status': status.name.toUpperCase(),
           if (color != null) 'color': color,
         },
@@ -151,7 +169,8 @@ class CareerService {
         );
       }
 
-      return Career.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return Career.fromJson(data);
     } catch (e) {
       rethrow;
     }
@@ -172,14 +191,32 @@ class CareerService {
   }
 
   /// Update current semester
-  Future<Career> updateCurrentSemester(String id, int semester) async {
-    return updateCareer(id, currentSemester: semester);
+  Future<void> updateCurrentSemester(String id, int semester) async {
+    try {
+      await _apiClient.put(
+        '/careers/$id/semester',
+        data: {
+          'currentSemester': semester,
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Restore deleted career
+  Future<void> restoreCareer(String id) async {
+    try {
+      await _apiClient.post('/careers/$id/restore');
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Get career statistics
   Future<Map<String, dynamic>> getCareerStatistics(String id) async {
     try {
-      final response = await _apiClient.get('/careers/$id/statistics');
+      final response = await _apiClient.get('/careers/$id/stats');
 
       if (response.data == null) {
         throw ApiException(
@@ -188,7 +225,8 @@ class CareerService {
         );
       }
 
-      return response.data;
+      final data = response.data['data'] ?? response.data;
+      return data;
     } catch (e) {
       rethrow;
     }

@@ -198,7 +198,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     );
 
-                    if (confirmed == true && mounted) {
+                    if (confirmed == true && context.mounted) {
                       // TODO: Implement cache clearing
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

@@ -52,29 +52,33 @@ const _$BillingPeriodEnumMap = {
 };
 
 Subscription _$SubscriptionFromJson(Map<String, dynamic> json) => Subscription(
-  id: json['id'] as String,
-  userId: json['user_id'] as String,
-  planId: json['plan_id'] as String,
-  status:
-      $enumDecodeNullable(_$SubscriptionStatusEnumMap, json['status']) ??
-      SubscriptionStatus.active,
-  startDate: DateTime.parse(json['start_date'] as String),
-  endDate: DateTime.parse(json['end_date'] as String),
+  id: json['id'] as String?,
+  userId: json['user_id'] as String?,
+  planId: json['plan_id'] as String?,
+  status: $enumDecodeNullable(_$SubscriptionStatusEnumMap, json['status']),
+  startDate: json['start_date'] == null
+      ? null
+      : DateTime.parse(json['start_date'] as String),
+  endDate: json['end_date'] == null
+      ? null
+      : DateTime.parse(json['end_date'] as String),
   trialEndsAt: json['trial_ends_at'] == null
       ? null
       : DateTime.parse(json['trial_ends_at'] as String),
   cancelledAt: json['cancelled_at'] == null
       ? null
       : DateTime.parse(json['cancelled_at'] as String),
-  autoRenew: json['auto_renew'] as bool? ?? true,
+  autoRenew: json['auto_renew'] as bool?,
   nextBillingDate: json['next_billing_date'] == null
       ? null
       : DateTime.parse(json['next_billing_date'] as String),
-  createdAt: DateTime.parse(json['created_at'] as String),
-  updatedAt: DateTime.parse(json['updated_at'] as String),
-  plan: json['plan'] == null
+  createdAt: json['created_at'] == null
       ? null
-      : Plan.fromJson(json['plan'] as Map<String, dynamic>),
+      : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
+      ? null
+      : DateTime.parse(json['updated_at'] as String),
+  plan: json['plan'],
 );
 
 Map<String, dynamic> _$SubscriptionToJson(Subscription instance) =>
@@ -82,15 +86,15 @@ Map<String, dynamic> _$SubscriptionToJson(Subscription instance) =>
       'id': instance.id,
       'user_id': instance.userId,
       'plan_id': instance.planId,
-      'status': _$SubscriptionStatusEnumMap[instance.status]!,
-      'start_date': instance.startDate.toIso8601String(),
-      'end_date': instance.endDate.toIso8601String(),
+      'status': _$SubscriptionStatusEnumMap[instance.status],
+      'start_date': instance.startDate?.toIso8601String(),
+      'end_date': instance.endDate?.toIso8601String(),
       'trial_ends_at': instance.trialEndsAt?.toIso8601String(),
       'cancelled_at': instance.cancelledAt?.toIso8601String(),
       'auto_renew': instance.autoRenew,
       'next_billing_date': instance.nextBillingDate?.toIso8601String(),
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
       'plan': instance.plan,
     };
 

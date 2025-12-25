@@ -42,7 +42,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final authService = AuthService(ApiClient());
+      // Use the shared ApiClient from provider
+      final apiClient = context.read<ApiClient>();
+      final authService = AuthService(apiClient);
+
       final authResponse = await authService.register(
         email: _emailController.text,
         password: _passwordController.text,
@@ -52,18 +55,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
+      // Update ApiClient with the new token
+      apiClient.updateToken(authResponse.accessToken);
+
       // Save auth data to provider
       await context.read<AuthProvider>().setAuthData(
             accessToken: authResponse.accessToken,
             refreshToken: authResponse.refreshToken,
+            tokenType: authResponse.tokenType,
+            expiresIn: authResponse.expiresIn,
             user: authResponse.user,
+            subscription: authResponse.subscription,
+            menu: authResponse.menu,
           );
 
       if (!mounted) return;
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration successful!')),
+        const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: Colors.green,
+        ),
       );
 
       // Navigate to home
@@ -72,7 +85,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: $e')),
+        SnackBar(
+          content: Text('Registration failed: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) {

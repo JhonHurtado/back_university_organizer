@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/api_client.dart';
 
 /// Profile screen for user information and settings
 class ProfileScreen extends StatelessWidget {
@@ -146,7 +149,14 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => context.go(AppRoutes.login),
+                onPressed: () async {
+                  final apiClient = context.read<ApiClient>();
+                  await context.read<AuthProvider>().logout();
+                  apiClient.clearToken();
+                  if (context.mounted) {
+                    context.go(AppRoutes.login);
+                  }
+                },
                 icon: const Icon(Icons.logout),
                 label: const Text('Logout'),
                 style: OutlinedButton.styleFrom(

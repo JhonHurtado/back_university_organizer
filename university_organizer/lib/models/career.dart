@@ -36,7 +36,7 @@ class Career {
   final String id;
 
   @JsonKey(name: 'user_id')
-  final String userId;
+  final String? userId;
 
   final String name;
   final String? code;
@@ -45,25 +45,25 @@ class Career {
   final String? campus;
 
   @JsonKey(name: 'total_credits')
-  final int totalCredits;
+  final int? totalCredits;
 
   @JsonKey(name: 'total_semesters')
-  final int totalSemesters;
+  final int? totalSemesters;
 
   @JsonKey(name: 'current_semester')
-  final int currentSemester;
+  final int? currentSemester;
 
   @JsonKey(name: 'grade_scale')
-  final GradeScale gradeScale;
+  final GradeScale? gradeScale;
 
   @JsonKey(name: 'min_passing_grade')
-  final double minPassingGrade;
+  final double? minPassingGrade;
 
   @JsonKey(name: 'max_grade')
-  final double maxGrade;
+  final double? maxGrade;
 
   @JsonKey(name: 'start_date')
-  final DateTime startDate;
+  final DateTime? startDate;
 
   @JsonKey(name: 'expected_end_date')
   final DateTime? expectedEndDate;
@@ -71,46 +71,54 @@ class Career {
   @JsonKey(name: 'actual_end_date')
   final DateTime? actualEndDate;
 
-  final CareerStatus status;
+  // Backend might send 'state' or 'status'
+  @JsonKey(name: 'status', unknownEnumValue: CareerStatus.active)
+  final CareerStatus? status;
+
   final String? color;
 
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   @JsonKey(name: 'deleted_at')
   final DateTime? deletedAt;
 
+  // Additional field that might come from backend as 'state'
+  final String? state;
+
   Career({
     required this.id,
-    required this.userId,
+    this.userId,
     required this.name,
     this.code,
     required this.university,
     this.faculty,
     this.campus,
-    required this.totalCredits,
-    required this.totalSemesters,
-    this.currentSemester = 1,
-    this.gradeScale = GradeScale.five,
-    this.minPassingGrade = 3.0,
-    this.maxGrade = 5.0,
-    required this.startDate,
+    this.totalCredits,
+    this.totalSemesters,
+    this.currentSemester,
+    this.gradeScale,
+    this.minPassingGrade,
+    this.maxGrade,
+    this.startDate,
     this.expectedEndDate,
     this.actualEndDate,
-    this.status = CareerStatus.active,
-    this.color = '#3B82F6',
-    required this.createdAt,
-    required this.updatedAt,
+    this.status,
+    this.color,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
+    this.state,
   });
 
   /// Get progress percentage
   double get progressPercentage {
-    if (totalSemesters == 0) return 0;
-    return (currentSemester / totalSemesters) * 100;
+    if (totalSemesters == null || totalSemesters == 0) return 0;
+    if (currentSemester == null) return 0;
+    return (currentSemester! / totalSemesters!) * 100;
   }
 
   /// Check if career is active
@@ -121,7 +129,8 @@ class Career {
 
   /// Get status display name
   String get statusDisplayName {
-    switch (status) {
+    if (status == null) return 'Active';
+    switch (status!) {
       case CareerStatus.active:
         return 'Active';
       case CareerStatus.completed:
@@ -137,7 +146,8 @@ class Career {
 
   /// Get grade scale display name
   String get gradeScaleDisplayName {
-    switch (gradeScale) {
+    if (gradeScale == null) return '0-5';
+    switch (gradeScale!) {
       case GradeScale.five:
         return '0-5';
       case GradeScale.ten:

@@ -35,30 +35,58 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final authService = AuthService(ApiClient());
+      print('📱 Starting login process...');
+
+      // Use the shared ApiClient from provider
+      final apiClient = context.read<ApiClient>();
+      final authService = AuthService(apiClient);
+
+      print('📱 Calling login API...');
       final authResponse = await authService.login(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
+      print('📱 Login API response received');
+      print('📱 User: ${authResponse.user.email}');
+
       if (!mounted) return;
 
+      // Update ApiClient with the new token
+      print('📱 Updating ApiClient token...');
+      apiClient.updateToken(authResponse.accessToken);
+
       // Save auth data to provider
+      print('📱 Saving auth data to provider...');
       await context.read<AuthProvider>().setAuthData(
             accessToken: authResponse.accessToken,
             refreshToken: authResponse.refreshToken,
+            tokenType: authResponse.tokenType,
+            expiresIn: authResponse.expiresIn,
             user: authResponse.user,
+            subscription: authResponse.subscription,
+            menu: authResponse.menu,
           );
+
+      print('📱 Auth data saved successfully');
 
       if (!mounted) return;
 
       // Navigate to home on success
+      print('📱 Navigating to home...');
       context.go(AppRoutes.home);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ Login error: $e');
+      print('❌ Stack trace: $stackTrace');
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        SnackBar(
+          content: Text('Login failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
       );
     } finally {
       if (mounted) {

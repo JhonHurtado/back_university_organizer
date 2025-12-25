@@ -9,13 +9,16 @@ class ScheduleService {
   ScheduleService(this._apiClient);
 
   /// Get all schedules for the current user
-  Future<List<Schedule>> getSchedules({String? enrollmentId}) async {
+  Future<List<Schedule>> getSchedules({String? enrollmentId, int? dayOfWeek}) async {
     try {
+      final queryParameters = <String, dynamic>{
+        if (enrollmentId != null) 'enrollmentId': enrollmentId,
+        if (dayOfWeek != null) 'dayOfWeek': dayOfWeek,
+      };
+
       final response = await _apiClient.get(
-        '/schedules',
-        queryParameters: enrollmentId != null
-            ? {'enrollment_id': enrollmentId}
-            : null,
+        '/schedules/schedules',
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
       );
 
       if (response.data == null) {
@@ -25,36 +28,10 @@ class ScheduleService {
         );
       }
 
-      final List<dynamic> data = response.data is List
-          ? response.data
-          : response.data['data'] ?? [];
+      final data = response.data['data'] ?? response.data;
+      final List<dynamic> schedules = data is List ? data : [];
 
-      return data.map((json) => Schedule.fromJson(json)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Get schedules for a specific day
-  Future<List<Schedule>> getSchedulesByDay(int dayOfWeek) async {
-    try {
-      final response = await _apiClient.get(
-        '/schedules',
-        queryParameters: {'day_of_week': dayOfWeek},
-      );
-
-      if (response.data == null) {
-        throw ApiException(
-          message: 'Invalid response from server',
-          statusCode: response.statusCode,
-        );
-      }
-
-      final List<dynamic> data = response.data is List
-          ? response.data
-          : response.data['data'] ?? [];
-
-      return data.map((json) => Schedule.fromJson(json)).toList();
+      return schedules.map((json) => Schedule.fromJson(json)).toList();
     } catch (e) {
       rethrow;
     }
@@ -63,7 +40,7 @@ class ScheduleService {
   /// Get a specific schedule by ID
   Future<Schedule> getSchedule(String id) async {
     try {
-      final response = await _apiClient.get('/schedules/$id');
+      final response = await _apiClient.get('/schedules/schedules/$id');
 
       if (response.data == null) {
         throw ApiException(
@@ -72,43 +49,34 @@ class ScheduleService {
         );
       }
 
-      return Schedule.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return Schedule.fromJson(data);
     } catch (e) {
       rethrow;
     }
   }
 
   /// Create a new schedule
-  Future<Schedule> createSchedule({
+  Future<Map<String, dynamic>> createSchedule({
     required String enrollmentId,
     required int dayOfWeek,
     required String startTime,
     required String endTime,
-    String? room,
-    String? building,
-    ScheduleType type = ScheduleType.classType,
-    String? color,
-    String? notes,
+    String? location,
+    String? scheduleType,
     bool isRecurring = true,
-    DateTime? startDate,
-    DateTime? endDate,
   }) async {
     try {
       final response = await _apiClient.post(
-        '/schedules',
+        '/schedules/schedules',
         data: {
-          'enrollment_id': enrollmentId,
-          'day_of_week': dayOfWeek,
-          'start_time': startTime,
-          'end_time': endTime,
-          if (room != null) 'room': room,
-          if (building != null) 'building': building,
-          'type': type.name.toUpperCase(),
-          if (color != null) 'color': color,
-          if (notes != null) 'notes': notes,
-          'is_recurring': isRecurring,
-          if (startDate != null) 'start_date': startDate.toIso8601String(),
-          if (endDate != null) 'end_date': endDate.toIso8601String(),
+          'enrollmentId': enrollmentId,
+          'dayOfWeek': dayOfWeek,
+          'startTime': startTime,
+          'endTime': endTime,
+          if (location != null) 'location': location,
+          if (scheduleType != null) 'scheduleType': scheduleType,
+          'isRecurring': isRecurring,
         },
       );
 
@@ -119,53 +87,35 @@ class ScheduleService {
         );
       }
 
-      return Schedule.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return data;
     } catch (e) {
       rethrow;
     }
   }
 
   /// Update a schedule
-  Future<Schedule> updateSchedule(
+  Future<void> updateSchedule(
     String id, {
     int? dayOfWeek,
     String? startTime,
     String? endTime,
-    String? room,
-    String? building,
-    ScheduleType? type,
-    String? color,
-    String? notes,
+    String? location,
+    String? scheduleType,
     bool? isRecurring,
-    DateTime? startDate,
-    DateTime? endDate,
   }) async {
     try {
-      final response = await _apiClient.patch(
-        '/schedules/$id',
+      await _apiClient.put(
+        '/schedules/schedules/$id',
         data: {
-          if (dayOfWeek != null) 'day_of_week': dayOfWeek,
-          if (startTime != null) 'start_time': startTime,
-          if (endTime != null) 'end_time': endTime,
-          if (room != null) 'room': room,
-          if (building != null) 'building': building,
-          if (type != null) 'type': type.name.toUpperCase(),
-          if (color != null) 'color': color,
-          if (notes != null) 'notes': notes,
-          if (isRecurring != null) 'is_recurring': isRecurring,
-          if (startDate != null) 'start_date': startDate.toIso8601String(),
-          if (endDate != null) 'end_date': endDate.toIso8601String(),
+          if (dayOfWeek != null) 'dayOfWeek': dayOfWeek,
+          if (startTime != null) 'startTime': startTime,
+          if (endTime != null) 'endTime': endTime,
+          if (location != null) 'location': location,
+          if (scheduleType != null) 'scheduleType': scheduleType,
+          if (isRecurring != null) 'isRecurring': isRecurring,
         },
       );
-
-      if (response.data == null) {
-        throw ApiException(
-          message: 'Invalid response from server',
-          statusCode: response.statusCode,
-        );
-      }
-
-      return Schedule.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -174,7 +124,7 @@ class ScheduleService {
   /// Delete a schedule
   Future<void> deleteSchedule(String id) async {
     try {
-      await _apiClient.delete('/schedules/$id');
+      await _apiClient.delete('/schedules/schedules/$id');
     } catch (e) {
       rethrow;
     }
@@ -201,77 +151,6 @@ class ScheduleService {
       }
 
       return weeklySchedule;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Check for schedule conflicts
-  Future<List<Schedule>> checkConflicts(
-    int dayOfWeek,
-    String startTime,
-    String endTime, {
-    String? excludeScheduleId,
-  }) async {
-    try {
-      final response = await _apiClient.post(
-        '/schedules/check-conflicts',
-        data: {
-          'day_of_week': dayOfWeek,
-          'start_time': startTime,
-          'end_time': endTime,
-          if (excludeScheduleId != null) 'exclude_id': excludeScheduleId,
-        },
-      );
-
-      if (response.data == null) {
-        throw ApiException(
-          message: 'Invalid response from server',
-          statusCode: response.statusCode,
-        );
-      }
-
-      final List<dynamic> data = response.data is List
-          ? response.data
-          : response.data['conflicts'] ?? [];
-
-      return data.map((json) => Schedule.fromJson(json)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Export schedule to PDF
-  Future<String> exportToPDF() async {
-    try {
-      final response = await _apiClient.post('/schedules/export/pdf');
-
-      if (response.data == null) {
-        throw ApiException(
-          message: 'Invalid response from server',
-          statusCode: response.statusCode,
-        );
-      }
-
-      return response.data['url'] ?? '';
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Export schedule to Excel
-  Future<String> exportToExcel() async {
-    try {
-      final response = await _apiClient.post('/schedules/export/excel');
-
-      if (response.data == null) {
-        throw ApiException(
-          message: 'Invalid response from server',
-          statusCode: response.statusCode,
-        );
-      }
-
-      return response.data['url'] ?? '';
     } catch (e) {
       rethrow;
     }

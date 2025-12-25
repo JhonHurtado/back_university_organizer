@@ -256,7 +256,7 @@ class _CareerCard extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final CareerStatus status;
+  final CareerStatus? status;
 
   const _StatusBadge({required this.status});
 
@@ -265,7 +265,7 @@ class _StatusBadge extends StatelessWidget {
     Color color;
     String label;
 
-    switch (status) {
+    switch (status ?? CareerStatus.active) {
       case CareerStatus.active:
         color = AppColors.success;
         label = 'Active';

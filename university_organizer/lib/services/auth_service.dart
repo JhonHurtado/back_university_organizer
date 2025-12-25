@@ -1,29 +1,70 @@
+import 'package:university_organizer/constants/app_constants.dart';
+
 import '../models/user.dart';
+import '../models/subscription.dart';
+import '../models/menu_item.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
-import '../constants/app_constants.dart';
 
 /// Authentication response model
 class AuthResponse {
   final String accessToken;
   final String refreshToken;
+  final String tokenType;
+  final int expiresIn;
   final User user;
+  final Subscription? subscription;
+  final List<MenuItem> menu;
 
   AuthResponse({
     required this.accessToken,
     required this.refreshToken,
+    required this.tokenType,
+    required this.expiresIn,
     required this.user,
+    this.subscription,
+    this.menu = const [],
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
-    // El backend retorna { success, message, data: { access_token, refresh_token, user } }
+    // El backend retorna { success, message, data: { access_token, refresh_token, token_type, expires_in, user, subscription, menu } }
     final data = json['data'] ?? json;
 
+    // Debug logging
+    print('🔍 Parsing AuthResponse:');
+    print('  access_token: ${data['access_token']?.substring(0, 20)}...');
+    print('  refresh_token: ${data['refresh_token']?.substring(0, 20)}...');
+    print('  token_type: ${data['token_type']}');
+    print('  expires_in: ${data['expires_in']}');
+    print('  user: ${data['user']}');
+    print('  subscription: ${data['subscription']}');
+    print('  menu: ${data['menu'] != null ? 'Array of ${(data['menu'] as List).length} items' : 'null'}');
+
     return AuthResponse(
-      accessToken: data['access_token'] ?? data['accessToken'] ?? '',
-      refreshToken: data['refresh_token'] ?? data['refreshToken'] ?? '',
-      user: User.fromJson(data['user']),
+      accessToken: data['access_token'] ?? '',
+      refreshToken: data['refresh_token'] ?? '',
+      tokenType: data['token_type'] ?? 'Bearer',
+      expiresIn: data['expires_in'] ?? 900,
+      user: User.fromJson(data['user'] ?? {}),
+      subscription: data['subscription'] != null
+          ? Subscription.fromJson(data['subscription'])
+          : null,
+      menu: data['menu'] != null
+          ? (data['menu'] as List).map((m) => MenuItem.fromJson(m)).toList()
+          : [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'access_token': accessToken,
+      'refresh_token': refreshToken,
+      'token_type': tokenType,
+      'expires_in': expiresIn,
+      'user': user.toJson(),
+      'subscription': subscription?.toJson(),
+      'menu': menu.map((m) => m.toJson()).toList(),
+    };
   }
 }
 
@@ -69,6 +110,8 @@ class AuthService {
     required String firstName,
     required String lastName,
     String? phone,
+    String? timezone,
+    String? language,
   }) async {
     try {
       final response = await _apiClient.post(
@@ -76,11 +119,11 @@ class AuthService {
         data: {
           'email': email,
           'password': password,
-          'first_name': firstName,
-          'last_name': lastName,
+          'firstName': firstName,
+          'lastName': lastName,
           if (phone != null) 'phone': phone,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
+          if (timezone != null) 'timezone': timezone,
+          if (language != null) 'language': language,
         },
       );
 
@@ -97,15 +140,13 @@ class AuthService {
     }
   }
 
-  /// Login with Google OAuth
-  Future<AuthResponse> loginWithGoogle({required String idToken}) async {
+  /// Login with Google OAuth (One-Tap)
+  Future<AuthResponse> loginWithGoogle({required String credential}) async {
     try {
       final response = await _apiClient.post(
         '/auth/google',
         data: {
-          'id_token': idToken,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
+          'credential': credential,
         },
       );
 
@@ -123,14 +164,12 @@ class AuthService {
   }
 
   /// Refresh access token
-  Future<AuthResponse> refreshToken({required String refreshToken}) async {
+  Future<Map<String, String>> refreshToken({required String refreshToken}) async {
     try {
       final response = await _apiClient.post(
         '/auth/refresh',
         data: {
-          'refresh_token': refreshToken,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
+          'refreshToken': refreshToken,
         },
       );
 
@@ -141,7 +180,12 @@ class AuthService {
         );
       }
 
-      return AuthResponse.fromJson(response.data);
+      // El backend retorna { success, message, data: { accessToken, refreshToken } }
+      final data = response.data['data'] ?? {};
+      return {
+        'accessToken': data['accessToken'] ?? '',
+        'refreshToken': data['refreshToken'] ?? '',
+      };
     } catch (e) {
       rethrow;
     }
@@ -150,13 +194,16 @@ class AuthService {
   /// Logout
   Future<void> logout() async {
     try {
-      await _apiClient.post(
-        '/auth/logout',
-        data: {
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
-        },
-      );
+      await _apiClient.post('/auth/logout');
+    } catch (e) {
+      // Ignore logout errors
+    }
+  }
+
+  /// Logout all sessions
+  Future<void> logoutAll() async {
+    try {
+      await _apiClient.post('/auth/logout-all');
     } catch (e) {
       // Ignore logout errors
     }
@@ -169,8 +216,6 @@ class AuthService {
         '/auth/forgot-password',
         data: {
           'email': email,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
         },
       );
     } catch (e) {
@@ -189,8 +234,6 @@ class AuthService {
         data: {
           'token': token,
           'password': newPassword,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
         },
       );
     } catch (e) {
@@ -205,8 +248,6 @@ class AuthService {
         '/auth/verify-email',
         data: {
           'token': token,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
         },
       );
     } catch (e) {
@@ -217,13 +258,7 @@ class AuthService {
   /// Resend verification email
   Future<void> resendVerificationEmail() async {
     try {
-      await _apiClient.post(
-        '/auth/resend-verification',
-        data: {
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
-        },
-      );
+      await _apiClient.post('/auth/resend-verification');
     } catch (e) {
       rethrow;
     }
@@ -241,7 +276,8 @@ class AuthService {
         );
       }
 
-      return User.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return User.fromJson(data);
     } catch (e) {
       rethrow;
     }
@@ -260,8 +296,8 @@ class AuthService {
       final response = await _apiClient.patch(
         '/auth/profile',
         data: {
-          if (firstName != null) 'first_name': firstName,
-          if (lastName != null) 'last_name': lastName,
+          if (firstName != null) 'firstName': firstName,
+          if (lastName != null) 'lastName': lastName,
           if (phone != null) 'phone': phone,
           if (avatar != null) 'avatar': avatar,
           if (timezone != null) 'timezone': timezone,
@@ -276,7 +312,8 @@ class AuthService {
         );
       }
 
-      return User.fromJson(response.data);
+      final data = response.data['data'] ?? response.data;
+      return User.fromJson(data);
     } catch (e) {
       rethrow;
     }
@@ -291,10 +328,8 @@ class AuthService {
       await _apiClient.post(
         '/auth/change-password',
         data: {
-          'current_password': currentPassword,
-          'new_password': newPassword,
-          'client_id': AppConstants.oauthClientId,
-          'client_secret': AppConstants.oauthClientSecret,
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
         },
       );
     } catch (e) {

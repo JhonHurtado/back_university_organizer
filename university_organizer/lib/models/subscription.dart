@@ -110,21 +110,21 @@ class Plan {
 /// Subscription model
 @JsonSerializable()
 class Subscription {
-  final String id;
+  final String? id;
 
   @JsonKey(name: 'user_id')
-  final String userId;
+  final String? userId;
 
   @JsonKey(name: 'plan_id')
-  final String planId;
+  final String? planId;
 
-  final SubscriptionStatus status;
+  final SubscriptionStatus? status;
 
   @JsonKey(name: 'start_date')
-  final DateTime startDate;
+  final DateTime? startDate;
 
   @JsonKey(name: 'end_date')
-  final DateTime endDate;
+  final DateTime? endDate;
 
   @JsonKey(name: 'trial_ends_at')
   final DateTime? trialEndsAt;
@@ -133,33 +133,33 @@ class Subscription {
   final DateTime? cancelledAt;
 
   @JsonKey(name: 'auto_renew')
-  final bool autoRenew;
+  final bool? autoRenew;
 
   @JsonKey(name: 'next_billing_date')
   final DateTime? nextBillingDate;
 
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
-  // Relation
-  final Plan? plan;
+  // Relation - can be either Plan object or String (plan name)
+  final dynamic plan;
 
   Subscription({
-    required this.id,
-    required this.userId,
-    required this.planId,
-    this.status = SubscriptionStatus.active,
-    required this.startDate,
-    required this.endDate,
+    this.id,
+    this.userId,
+    this.planId,
+    this.status,
+    this.startDate,
+    this.endDate,
     this.trialEndsAt,
     this.cancelledAt,
-    this.autoRenew = true,
+    this.autoRenew,
     this.nextBillingDate,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     this.plan,
   });
 
@@ -176,9 +176,10 @@ class Subscription {
 
   /// Get days remaining
   int get daysRemaining {
+    if (endDate == null) return 0;
     final now = DateTime.now();
-    if (now.isAfter(endDate)) return 0;
-    return endDate.difference(now).inDays;
+    if (now.isAfter(endDate!)) return 0;
+    return endDate!.difference(now).inDays;
   }
 
   /// Check if trial is active
@@ -187,9 +188,18 @@ class Subscription {
     return DateTime.now().isBefore(trialEndsAt!);
   }
 
+  /// Get plan name
+  String get planName {
+    if (plan == null) return 'Free';
+    if (plan is String) return plan as String;
+    if (plan is Plan) return (plan as Plan).name;
+    return 'Unknown';
+  }
+
   /// Get status display name
   String get statusDisplayName {
-    switch (status) {
+    if (status == null) return 'Unknown';
+    switch (status!) {
       case SubscriptionStatus.trial:
         return 'Trial';
       case SubscriptionStatus.active:
@@ -207,7 +217,8 @@ class Subscription {
 
   /// Get status color
   String get statusColor {
-    switch (status) {
+    if (status == null) return '#9CA3AF'; // Gray
+    switch (status!) {
       case SubscriptionStatus.trial:
       case SubscriptionStatus.active:
         return '#10B981'; // Green
@@ -239,7 +250,7 @@ class Subscription {
     DateTime? nextBillingDate,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Plan? plan,
+    dynamic plan,
   }) {
     return Subscription(
       id: id ?? this.id,
