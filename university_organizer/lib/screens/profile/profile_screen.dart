@@ -55,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
                     leading: const Icon(Icons.edit),
                     title: const Text('Edit Profile'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    onTap: () => context.push(AppRoutes.editProfile),
                   ),
                   const Divider(height: 1),
                   ListTile(
@@ -83,6 +83,13 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.settings),
+                    title: const Text('Settings'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.settings),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.tune),
                     title: const Text('Preferences'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push(AppRoutes.preferences),

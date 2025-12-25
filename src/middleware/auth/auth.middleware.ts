@@ -7,16 +7,49 @@ import passport from "../../config/auth/passport";
 // =====================================================
 // REQUIRE AUTH (Bearer token)
 // =====================================================
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate("bearer", { session: false }, (err: any, user: any) => {
+export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
+  // Verificar que el header Authorization existe
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    res.status(401).json({
+      error: "unauthorized",
+      message: "Token no proporcionado. Incluye el header: Authorization: Bearer {token}"
+    });
+    return;
+  }
+
+  // Verificar formato del header
+  if (!authHeader.startsWith("Bearer ")) {
+    res.status(401).json({
+      error: "unauthorized",
+      message: "Formato de token inválido. Debe ser: Authorization: Bearer {token}"
+    });
+    return;
+  }
+
+  passport.authenticate("bearer", { session: false }, (err: any, user: any, info: any) => {
     if (err) {
-      return res.status(500).json({ error: "server_error" });
+      console.error("Auth middleware error:", err);
+      return res.status(500).json({
+        error: "server_error",
+        message: "Error interno del servidor durante la autenticación"
+      });
     }
 
-    console.log(user);
-
     if (!user) {
-      return res.status(401).json({ error: "unauthorized" });
+      // Mensaje más descriptivo basado en el error
+      let message = "Token inválido o expirado";
+
+      if (info?.message) {
+        message = info.message;
+      }
+
+      return res.status(401).json({
+        error: "unauthorized",
+        message,
+        hint: "Asegúrate de usar un token válido y no expirado. Los tokens expiran en 15 minutos."
+      });
     }
 
     req.user = user;
