@@ -4,15 +4,29 @@ import '../constants/app_constants.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
 import 'interceptors/error_interceptor.dart';
+import 'interceptors/refresh_token_interceptor.dart';
 
 /// Base API client using Dio
 class ApiClient {
   late final Dio _dio;
 
+  // Callbacks for refresh token
+  Future<Map<String, String>> Function(String refreshToken)? _onRefreshToken;
+  Future<String?> Function()? _onGetRefreshToken;
+  Future<void> Function(String accessToken, String? refreshToken)? _onUpdateTokens;
+  Future<void> Function()? _onLogout;
+
   ApiClient({
     String? baseUrl,
     String? accessToken,
-  }) {
+    Future<Map<String, String>> Function(String refreshToken)? onRefreshToken,
+    Future<String?> Function()? onGetRefreshToken,
+    Future<void> Function(String accessToken, String? refreshToken)? onUpdateTokens,
+    Future<void> Function()? onLogout,
+  }) : _onRefreshToken = onRefreshToken,
+       _onGetRefreshToken = onGetRefreshToken,
+       _onUpdateTokens = onUpdateTokens,
+       _onLogout = onLogout {
     print('ApiClient initialized with baseUrl: ${baseUrl ?? AppConstants.apiBaseUrl}');
     print('Access Token: $accessToken');
     _dio = Dio(
@@ -30,12 +44,57 @@ class ApiClient {
 
     // Add interceptors
     _dio.interceptors.add(AuthInterceptor(accessToken: accessToken));
+
+    // Add refresh token interceptor if callbacks are provided
+    if (onRefreshToken != null &&
+        onGetRefreshToken != null &&
+        onUpdateTokens != null &&
+        onLogout != null) {
+      _dio.interceptors.add(
+        RefreshTokenInterceptor(
+          dio: _dio,
+          refreshTokenCallback: onRefreshToken,
+          getRefreshTokenCallback: onGetRefreshToken,
+          updateTokensCallback: onUpdateTokens,
+          logoutCallback: onLogout,
+        ),
+      );
+    }
+
     _dio.interceptors.add(ErrorInterceptor());
 
     // Only add logging interceptor in debug mode
     if (kDebugMode) {
       _dio.interceptors.add(LoggingInterceptor());
     }
+  }
+
+  /// Set refresh token callbacks
+  void setRefreshTokenCallbacks({
+    required Future<Map<String, String>> Function(String refreshToken) onRefreshToken,
+    required Future<String?> Function() onGetRefreshToken,
+    required Future<void> Function(String accessToken, String? refreshToken) onUpdateTokens,
+    required Future<void> Function() onLogout,
+  }) {
+    _onRefreshToken = onRefreshToken;
+    _onGetRefreshToken = onGetRefreshToken;
+    _onUpdateTokens = onUpdateTokens;
+    _onLogout = onLogout;
+
+    // Remove old refresh token interceptor if exists
+    _dio.interceptors.removeWhere((interceptor) => interceptor is RefreshTokenInterceptor);
+
+    // Add new refresh token interceptor
+    _dio.interceptors.insert(
+      1, // After auth interceptor, before error interceptor
+      RefreshTokenInterceptor(
+        dio: _dio,
+        refreshTokenCallback: onRefreshToken,
+        getRefreshTokenCallback: onGetRefreshToken,
+        updateTokensCallback: onUpdateTokens,
+        logoutCallback: onLogout,
+      ),
+    );
   }
 
   /// Get Dio instance

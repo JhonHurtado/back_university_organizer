@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/career_provider.dart';
 import '../../models/career.dart';
 import 'create_career_screen.dart';
@@ -19,7 +20,12 @@ class _CareersListScreenState extends State<CareersListScreen> {
     super.initState();
     // Load careers when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CareerProvider>().loadCareers();
+      final authProvider = context.read<AuthProvider>();
+
+      // Only load careers if user is authenticated
+      if (authProvider.isAuthenticated) {
+        context.read<CareerProvider>().loadCareers();
+      }
     });
   }
 

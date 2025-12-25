@@ -59,9 +59,9 @@ class ThemeProvider extends ChangeNotifier {
 
   /// Toggle between light and dark mode
   Future<void> toggleTheme() async {
-    final newMode = _themeMode == ThemeMode.light
-        ? ThemeMode.dark
-        : ThemeMode.light;
+    // Si está en dark o system con dark, cambia a light
+    // Si está en light o system con light, cambia a dark
+    final newMode = isDarkMode ? ThemeMode.light : ThemeMode.dark;
     await setThemeMode(newMode);
   }
 }

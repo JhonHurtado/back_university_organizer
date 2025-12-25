@@ -6,8 +6,10 @@ import '../../constants/app_routes.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/career_provider.dart';
 import '../../providers/notification_provider.dart';
-import '../../services/api_client.dart';
 import '../careers/careers_list_screen.dart';
+import '../grades/grades_overview_screen.dart';
+import '../schedule/schedule_weekly_view.dart';
+import '../profile/profile_screen.dart';
 
 /// Home screen - Main dashboard of the app
 class HomeScreen extends StatefulWidget {
@@ -86,7 +88,14 @@ class _DashboardTabState extends State<DashboardTab> {
     super.initState();
     // Load data when tab initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CareerProvider>().loadCareers();
+      final authProvider = context.read<AuthProvider>();
+
+      // Only load data if user is authenticated
+      if (authProvider.isAuthenticated) {
+        context.read<CareerProvider>().loadCareers();
+      }
+
+      // Notifications can always load (mock data)
       context.read<NotificationProvider>().loadNotifications();
     });
   }
@@ -351,7 +360,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ==================== OTHER TABS (Placeholders) ====================
+// ==================== OTHER TABS ====================
 
 class CareersTab extends StatelessWidget {
   const CareersTab({super.key});
@@ -369,10 +378,8 @@ class GradesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('My Grades')),
-      body: const Center(child: Text('Grades Tab - Coming Soon')),
-    );
+    // Use the actual GradesOverviewScreen
+    return const GradesOverviewScreen();
   }
 }
 
@@ -381,10 +388,8 @@ class ScheduleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('My Schedule')),
-      body: const Center(child: Text('Schedule Tab - Coming Soon')),
-    );
+    // Use the actual ScheduleWeeklyView
+    return const ScheduleWeeklyView();
   }
 }
 
@@ -393,133 +398,7 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          final user = authProvider.currentUser;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Profile Header
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: AppColors.primary,
-                  child: user?.avatar != null
-                      ? ClipOval(
-                          child: Image.network(
-                            user!.avatar!,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Text(
-                              user.initials,
-                              style: const TextStyle(
-                                fontSize: 32,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        )
-                      : Text(
-                          user?.initials ?? 'U',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  user?.fullName ?? 'User',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  user?.email ?? 'user@example.com',
-                  style: const TextStyle(color: AppColors.textSecondaryLight),
-                ),
-                const SizedBox(height: 32),
-
-                // Menu Items
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Preferences'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(AppRoutes.preferences),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.help_outline),
-                  title: const Text('Help & Support'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('About'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
-                ),
-                const Divider(),
-                const SizedBox(height: 24),
-
-                // Logout Button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Logout'),
-                          content: const Text(
-                            'Are you sure you want to logout?',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text('Logout'),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (confirm == true && context.mounted) {
-                        final apiClient = context.read<ApiClient>();
-                        await authProvider.logout();
-                        apiClient.clearToken();
-                        if (context.mounted) {
-                          context.go(AppRoutes.login);
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Logout'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+    // Use the actual ProfileScreen
+    return const ProfileScreen();
   }
 }

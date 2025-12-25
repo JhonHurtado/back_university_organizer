@@ -162,9 +162,44 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _secureStorage.write(key: _accessTokenKey, value: newAccessToken);
       _accessToken = newAccessToken;
+
+      // Update token expiration
+      final expiration = DateTime.now().add(Duration(seconds: _expiresIn));
+      _tokenExpiration = expiration;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_tokenExpirationKey, expiration.millisecondsSinceEpoch);
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error updating access token: $e');
+    }
+  }
+
+  /// Update both access and refresh tokens (for refresh token flow)
+  Future<void> updateTokens({
+    required String accessToken,
+    String? refreshToken,
+  }) async {
+    try {
+      await _secureStorage.write(key: _accessTokenKey, value: accessToken);
+      _accessToken = accessToken;
+
+      if (refreshToken != null) {
+        await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
+        _refreshToken = refreshToken;
+      }
+
+      // Update token expiration
+      final expiration = DateTime.now().add(Duration(seconds: _expiresIn));
+      _tokenExpiration = expiration;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_tokenExpirationKey, expiration.millisecondsSinceEpoch);
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating tokens: $e');
     }
   }
 

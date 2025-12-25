@@ -12,7 +12,10 @@ import 'providers/auth_provider.dart';
 import 'providers/career_provider.dart';
 import 'providers/notification_provider.dart';
 import 'services/api_client.dart';
+import 'services/auth_service.dart';
 import 'services/career_service.dart';
+import 'services/schedule_service.dart';
+import 'services/grade_service.dart';
 
 // Import generated localizations
 import 'generated/l10n/app_localizations.dart';
@@ -62,10 +65,33 @@ class MyApp extends StatelessWidget {
         // API Client - create once and share
         // Initialize with token from AuthProvider
         ProxyProvider<AuthProvider, ApiClient>(
-          update: (_, authProvider, previous) {
+          update: (context, authProvider, previous) {
             final apiClient = previous ?? ApiClient();
+
             // Update token whenever AuthProvider changes
             apiClient.updateToken(authProvider.accessToken);
+
+            // Set refresh token callbacks
+            apiClient.setRefreshTokenCallbacks(
+              onRefreshToken: (refreshToken) async {
+                // Call auth service to refresh token
+                final authService = AuthService(apiClient);
+                return await authService.refreshToken(refreshToken: refreshToken);
+              },
+              onGetRefreshToken: () async {
+                return authProvider.refreshToken;
+              },
+              onUpdateTokens: (accessToken, refreshToken) async {
+                await authProvider.updateTokens(
+                  accessToken: accessToken,
+                  refreshToken: refreshToken,
+                );
+              },
+              onLogout: () async {
+                await authProvider.logout();
+              },
+            );
+
             return apiClient;
           },
         ),
@@ -74,11 +100,17 @@ class MyApp extends StatelessWidget {
         ProxyProvider<ApiClient, CareerService>(
           update: (_, apiClient, __) => CareerService(apiClient),
         ),
+        ProxyProvider<ApiClient, ScheduleService>(
+          update: (_, apiClient, __) => ScheduleService(apiClient),
+        ),
+        ProxyProvider<ApiClient, GradeService>(
+          update: (_, apiClient, __) => GradeService(apiClient),
+        ),
 
         // Data providers
         ChangeNotifierProxyProvider<CareerService, CareerProvider>(
           create: (context) => CareerProvider(
-            context.read<CareerService>(),
+            CareerService(ApiClient()),
           ),
           update: (_, service, previous) =>
               previous ?? CareerProvider(service),

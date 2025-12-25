@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/schedule.dart';
+import '../../services/schedule_service.dart';
 
 /// Add/Edit schedule screen for creating or updating schedule entries
 class AddEditScheduleScreen extends StatefulWidget {
@@ -199,8 +201,71 @@ class _AddEditScheduleScreenState extends State<AddEditScheduleScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Save schedule via API
-      await Future.delayed(const Duration(seconds: 1));
+      final scheduleService = context.read<ScheduleService>();
+
+      // Convert TimeOfDay to String format (HH:mm)
+      final startTimeStr = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
+      final endTimeStr = '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}';
+
+      // Prepare location string
+      final location = _roomController.text.isNotEmpty && _buildingController.text.isNotEmpty
+          ? '${_roomController.text}, ${_buildingController.text}'
+          : _roomController.text.isNotEmpty
+              ? _roomController.text
+              : _buildingController.text.isNotEmpty
+                  ? _buildingController.text
+                  : null;
+
+      // Convert ScheduleType enum to string
+      String scheduleTypeStr;
+      switch (_scheduleType) {
+        case ScheduleType.classType:
+          scheduleTypeStr = 'CLASS';
+          break;
+        case ScheduleType.lab:
+          scheduleTypeStr = 'LAB';
+          break;
+        case ScheduleType.tutorial:
+          scheduleTypeStr = 'TUTORIAL';
+          break;
+        case ScheduleType.officeHours:
+          scheduleTypeStr = 'OFFICE_HOURS';
+          break;
+        case ScheduleType.exam:
+          scheduleTypeStr = 'EXAM';
+          break;
+        case ScheduleType.other:
+          scheduleTypeStr = 'OTHER';
+          break;
+      }
+
+      if (widget.isEditMode && widget.scheduleId != null) {
+        // Update existing schedule
+        await scheduleService.updateSchedule(
+          widget.scheduleId!,
+          dayOfWeek: _dayOfWeek,
+          startTime: startTimeStr,
+          endTime: endTimeStr,
+          location: location,
+          scheduleType: scheduleTypeStr,
+          isRecurring: _isRecurring,
+        );
+      } else {
+        // Create new schedule
+        if (_selectedSubjectId == null) {
+          throw Exception('Please select a subject');
+        }
+
+        await scheduleService.createSchedule(
+          enrollmentId: _selectedSubjectId!,
+          dayOfWeek: _dayOfWeek,
+          startTime: startTimeStr,
+          endTime: endTimeStr,
+          location: location,
+          scheduleType: scheduleTypeStr,
+          isRecurring: _isRecurring,
+        );
+      }
 
       if (!mounted) return;
 

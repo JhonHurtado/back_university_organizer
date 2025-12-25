@@ -1,158 +1,209 @@
 import 'package:flutter/material.dart';
 
 /// Application color palette
-/// Based on a modern, academic-focused design system
+/// Supports both dark and light themes with excellent contrast
 class AppColors {
   AppColors._();
 
-  // ==================== PRIMARY COLORS ====================
+  // ==================== DARK THEME COLORS ====================
 
-  /// Primary Blue - Main brand color
-  static const Color primary = Color.fromARGB(255, 42, 72, 138);
-  static const Color primaryLight = Color(0xFF3B82F6);
-  static const Color primaryDark = Color.fromARGB(255, 100, 126, 209);
-  static const Color primaryLighter = Color(0xFF60A5FA);
-  static const Color primaryDarker = Color(0xFF1E3A8A);
+  /// Dark theme - Primary colors
+  static const Color darkPrimary = Color(0xFF3AB896); // Teal/cyan suave (no neon)
+  static const Color darkPrimaryLight = Color(0xFF4DD4AC);
+  static const Color darkPrimaryDark = Color(0xFF2A9D7F);
 
-  /// Secondary Purple - Accent brand color
-  static const Color secondary = Color.fromARGB(255, 83, 57, 124);
-  static const Color secondaryLight = Color(0xFF8B5CF6);
-  static const Color secondaryDark = Color(0xFF6D28D9);
-  static const Color secondaryLighter = Color(0xFFA78BFA);
-  static const Color secondaryDarker = Color(0xFF5B21B6);
+  /// Dark theme - Secondary colors
+  static const Color darkSecondary = Color(0xFF6B7FDB); // Blue/purple
+  static const Color darkSecondaryLight = Color(0xFF8694E3);
+  static const Color darkSecondaryDark = Color(0xFF5569D3);
 
-  // ==================== SEMANTIC COLORS ====================
+  /// Dark theme - Background colors
+  static const Color darkBackground = Color(0xFF0B0B0F); // Casi negro
+  static const Color darkSurface = Color(0xFF16161D);     // Cards
+  static const Color darkSurfaceVariant = Color(0xFF1E1E28); // Inputs
+  static const Color darkSurfaceContainer = Color(0xFF252531); // Containers
 
-  /// Success - Green tones
-  static const Color success = Color(0xFF10B981);
-  static const Color successLight = Color(0xFF34D399);
-  static const Color successDark = Color(0xFF059669);
+  /// Dark theme - Text colors (EXCELLENT CONTRAST)
+  static const Color darkTextPrimary = Color(0xFFFAFAFA);   // Casi blanco
+  static const Color darkTextSecondary = Color(0xFFB8B8BE); // Gris claro
+  static const Color darkTextTertiary = Color(0xFF7F7F8C);  // Gris medio
+  static const Color darkTextDisabled = Color(0xFF4B4B58);  // Gris oscuro
 
-  /// Error - Red tones
-  static const Color error = Color(0xFFEF4444);
-  static const Color errorLight = Color(0xFFF87171);
-  static const Color errorDark = Color(0xFFDC2626);
+  /// Dark theme - Border colors
+  static const Color darkBorder = Color(0xFF2A2A35);
+  static const Color darkDivider = Color(0xFF1F1F2A);
 
-  /// Warning - Amber/Orange tones
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color warningLight = Color(0xFFFBBF24);
-  static const Color warningDark = Color(0xFFD97706);
+  // ==================== LIGHT THEME COLORS ====================
 
-  /// Info - Blue tones
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoLight = Color(0xFF60A5FA);
-  static const Color infoDark = Color(0xFF2563EB);
+  /// Light theme - Primary colors
+  static const Color lightPrimary = Color(0xFF2A9D7F); // Más oscuro para light mode
+  static const Color lightPrimaryLight = Color(0xFF3AB896);
+  static const Color lightPrimaryDark = Color(0xFF1F7A61);
+
+  /// Light theme - Secondary colors
+  static const Color lightSecondary = Color(0xFF5569D3);
+  static const Color lightSecondaryLight = Color(0xFF6B7FDB);
+  static const Color lightSecondaryDark = Color(0xFF3F54CB);
+
+  /// Light theme - Background colors
+  static const Color lightBackground = Color(0xFFF8F9FA); // Gris muy claro
+  static const Color lightSurface = Color(0xFFFFFFFF);     // Blanco
+  static const Color lightSurfaceVariant = Color(0xFFF1F3F5); // Inputs
+  static const Color lightSurfaceContainer = Color(0xFFE9ECEF); // Containers
+
+  /// Light theme - Text colors (EXCELLENT CONTRAST)
+  static const Color lightTextPrimary = Color(0xFF1A1A1F);   // Casi negro
+  static const Color lightTextSecondary = Color(0xFF4B4B58); // Gris oscuro
+  static const Color lightTextTertiary = Color(0xFF7F7F8C);  // Gris medio
+  static const Color lightTextDisabled = Color(0xFFB8B8BE);  // Gris claro
+
+  /// Light theme - Border colors
+  static const Color lightBorder = Color(0xFFDEE2E6);
+  static const Color lightDivider = Color(0xFFE9ECEF);
+
+  // ==================== SEMANTIC COLORS (Same for both themes) ====================
+
+  /// Success colors
+  static const Color success = Color(0xFF3AB896);
+  static const Color successLight = Color(0xFF4DD4AC);
+  static const Color successDark = Color(0xFF2A9D7F);
+  static const Color successContainer = Color(0xFF1F7A61);
+
+  /// Error colors
+  static const Color error = Color(0xFFE57373);
+  static const Color errorLight = Color(0xFFEF9A9A);
+  static const Color errorDark = Color(0xFFD32F2F);
+  static const Color errorContainer = Color(0xFFC62828);
+
+  /// Warning colors
+  static const Color warning = Color(0xFFFFB74D);
+  static const Color warningLight = Color(0xFFFFCC80);
+  static const Color warningDark = Color(0xFFFFA726);
+  static const Color warningContainer = Color(0xFFF57C00);
+
+  /// Info colors
+  static const Color info = Color(0xFF6B7FDB);
+  static const Color infoLight = Color(0xFF8694E3);
+  static const Color infoDark = Color(0xFF5569D3);
+  static const Color infoContainer = Color(0xFF3F54CB);
 
   // ==================== GRADE COLORS ====================
 
-  /// Grade color scale
-  static const Color gradeExcellent = Color(0xFF10B981); // 85-100%
-  static const Color gradeGood = Color(0xFF3B82F6);      // 70-84%
-  static const Color gradeAverage = Color(0xFFF59E0B);   // 60-69%
-  static const Color gradePoor = Color(0xFFEF4444);      // <60%
-  static const Color gradeNone = Color(0xFF9CA3AF);      // No grade
+  static const Color gradeExcellent = Color(0xFF3AB896); // 85-100%
+  static const Color gradeGood = Color(0xFF6B7FDB);      // 70-84%
+  static const Color gradeAverage = Color(0xFFFFB74D);   // 60-69%
+  static const Color gradePoor = Color(0xFFE57373);      // <60%
+  static const Color gradeNone = Color(0xFF7F7F8C);      // No grade
 
   // ==================== STATUS COLORS ====================
 
-  static const Color statusActive = Color(0xFF10B981);
-  static const Color statusInactive = Color(0xFF6B7280);
-  static const Color statusPending = Color(0xFFF59E0B);
-  static const Color statusCompleted = Color(0xFF3B82F6);
-  static const Color statusCancelled = Color(0xFFEF4444);
-  static const Color statusPaused = Color(0xFF8B5CF6);
+  static const Color statusActive = Color(0xFF3AB896);
+  static const Color statusInactive = Color(0xFF7F7F8C);
+  static const Color statusPending = Color(0xFFFFB74D);
+  static const Color statusCompleted = Color(0xFF6B7FDB);
+  static const Color statusCancelled = Color(0xFFE57373);
+  static const Color statusPaused = Color(0xFF9575CD);
 
   // ==================== SUBJECT TYPE COLORS ====================
 
-  static const Color subjectRequired = Color(0xFF2563EB);
-  static const Color subjectElective = Color(0xFF7C3AED);
-  static const Color subjectFreeElective = Color(0xFF10B981);
-  static const Color subjectComplementary = Color(0xFFF59E0B);
-
-  // ==================== BACKGROUND COLORS ====================
-
-  // Light theme backgrounds
-  static const Color backgroundLight = Color(0xFFF9FAFB);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceVariantLight = Color(0xFFF3F4F6);
-  static const Color cardLight = Color(0xFFFFFFFF);
-
-  // Dark theme backgrounds
-  static const Color backgroundDark = Color(0xFF111827);
-  static const Color surfaceDark = Color(0xFF1F2937);
-  static const Color surfaceVariantDark = Color(0xFF374151);
-  static const Color cardDark = Color(0xFF1F2937);
-
-  // ==================== TEXT COLORS ====================
-
-  // Light theme text
-  static const Color textPrimaryLight = Color(0xFF111827);
-  static const Color textSecondaryLight = Color(0xFF6B7280);
-  static const Color textTertiaryLight = Color(0xFF9CA3AF);
-  static const Color textDisabledLight = Color(0xFFD1D5DB);
-
-  // Dark theme text
-  static const Color textPrimaryDark = Color(0xFFF9FAFB);
-  static const Color textSecondaryDark = Color(0xFF9CA3AF);
-  static const Color textTertiaryDark = Color(0xFF6B7280);
-  static const Color textDisabledDark = Color(0xFF4B5563);
-
-  // ==================== BORDER COLORS ====================
-
-  static const Color borderLight = Color(0xFFE5E7EB);
-  static const Color borderDark = Color(0xFF374151);
-  static const Color dividerLight = Color(0xFFE5E7EB);
-  static const Color dividerDark = Color(0xFF374151);
-
-  // ==================== OVERLAY COLORS ====================
-
-  static const Color overlayLight = Color(0x1F000000);
-  static const Color overlayDark = Color(0x3FFFFFFF);
-  static const Color scrimLight = Color(0x99000000);
-  static const Color scrimDark = Color(0x99000000);
+  static const Color subjectRequired = Color(0xFF6B7FDB);
+  static const Color subjectElective = Color(0xFF9575CD);
+  static const Color subjectFreeElective = Color(0xFF3AB896);
+  static const Color subjectComplementary = Color(0xFFFFB74D);
 
   // ==================== GRADIENTS ====================
 
-  /// Primary gradient
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryDark],
+    colors: [Color(0xFF3AB896), Color(0xFF2A9D7F)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Secondary gradient
   static const LinearGradient secondaryGradient = LinearGradient(
-    colors: [secondary, secondaryDark],
+    colors: [Color(0xFF6B7FDB), Color(0xFF5569D3)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Success gradient
   static const LinearGradient successGradient = LinearGradient(
-    colors: [successLight, success],
+    colors: [Color(0xFF4DD4AC), Color(0xFF3AB896)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Premium gradient
-  static const LinearGradient premiumGradient = LinearGradient(
-    colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+  static const LinearGradient darkCardGradient = LinearGradient(
+    colors: [Color(0xFF1E1E28), Color(0xFF16161D)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Academic gradient (for hero sections)
+  /// Academic gradient (Cyan to Purple) - for backward compatibility
   static const LinearGradient academicGradient = LinearGradient(
-    colors: [primary, secondary],
+    colors: [Color(0xFF3AB896), Color(0xFF6B7FDB)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // ==================== SHADOW COLORS ====================
+  /// Premium gradient - for backward compatibility
+  static const LinearGradient premiumGradient = LinearGradient(
+    colors: [Color(0xFFFFB74D), Color(0xFFE57373)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
-  static const Color shadowLight = Color(0x1A000000);
-  static const Color shadowDark = Color(0x3F000000);
+  // ==================== BACKWARD COMPATIBILITY ====================
+
+  /// Legacy color names (for backward compatibility - use dark theme colors by default)
+  static const Color primary = darkPrimary;
+  static const Color primaryLight = darkPrimaryLight;
+  static const Color primaryDark = darkPrimaryDark;
+  static const Color secondary = darkSecondary;
+  static const Color secondaryLight = darkSecondaryLight;
+  static const Color secondaryDark = darkSecondaryDark;
+  static const Color backgroundLight = lightBackground;
+  static const Color surfaceLight = lightSurface;
+  static const Color surfaceVariantLight = lightSurfaceVariant;
+  static const Color cardLight = lightSurface;
+  static const Color backgroundDarkLegacy = darkBackground;
+  static const Color surfaceDarkLegacy = darkSurface;
+  static const Color surfaceVariantDarkLegacy = darkSurfaceVariant;
+  static const Color cardDark = darkSurface;
+  static const Color textPrimaryLight = lightTextPrimary;
+  static const Color textSecondaryLight = lightTextSecondary;
+  static const Color textTertiaryLight = lightTextTertiary;
+  static const Color textDisabledLight = lightTextDisabled;
+  static const Color textPrimaryDark = darkTextPrimary;
+  static const Color textSecondaryDark = darkTextSecondary;
+  static const Color textTertiaryDark = darkTextTertiary;
+  static const Color textDisabledDark = darkTextDisabled;
+  static const Color borderLight = lightBorder;
+  static const Color borderDark = darkBorder;
+  static const Color dividerLight = lightDivider;
+  static const Color dividerDark = darkDivider;
 
   // ==================== UTILITY METHODS ====================
+
+  /// Get theme-specific colors
+  static Color getBackground(bool isDark) =>
+      isDark ? darkBackground : lightBackground;
+
+  static Color getSurface(bool isDark) =>
+      isDark ? darkSurface : lightSurface;
+
+  static Color getSurfaceVariant(bool isDark) =>
+      isDark ? darkSurfaceVariant : lightSurfaceVariant;
+
+  static Color getPrimary(bool isDark) =>
+      isDark ? darkPrimary : lightPrimary;
+
+  static Color getTextPrimary(bool isDark) =>
+      isDark ? darkTextPrimary : lightTextPrimary;
+
+  static Color getTextSecondary(bool isDark) =>
+      isDark ? darkTextSecondary : lightTextSecondary;
+
+  static Color getBorder(bool isDark) =>
+      isDark ? darkBorder : lightBorder;
 
   /// Get grade color based on percentage
   static Color getGradeColor(double percentage) {
