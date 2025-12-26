@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 /// Interceptor to add authentication token to requests
 class AuthInterceptor extends Interceptor {
@@ -8,6 +9,9 @@ class AuthInterceptor extends Interceptor {
 
   /// Update access token
   void updateToken(String? token) {
+    debugPrint('🔑 AuthInterceptor: Token updated');
+    debugPrint('  Old token: ${_accessToken?.substring(0, 20) ?? 'null'}...');
+    debugPrint('  New token: ${token?.substring(0, 20) ?? 'null'}...');
     _accessToken = token;
   }
 
@@ -15,7 +19,11 @@ class AuthInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // Add authorization header if token exists
     if (_accessToken != null && _accessToken!.isNotEmpty) {
+      debugPrint('🔑 AuthInterceptor: Adding Authorization header');
+      debugPrint('  Token: ${_accessToken!.substring(0, 20)}...');
       options.headers['Authorization'] = 'Bearer $_accessToken';
+    } else {
+      debugPrint('⚠️  AuthInterceptor: No token available for ${options.path}');
     }
 
     super.onRequest(options, handler);

@@ -66,9 +66,15 @@ class MyApp extends StatelessWidget {
         // Initialize with token from AuthProvider
         ProxyProvider<AuthProvider, ApiClient>(
           update: (context, authProvider, previous) {
+            debugPrint('🔄 ProxyProvider<ApiClient>: Updating...');
+            debugPrint('  Previous: ${previous != null ? 'exists' : 'null'}');
+            debugPrint('  AuthProvider.accessToken: ${authProvider.accessToken?.substring(0, 20) ?? 'null'}...');
+            debugPrint('  AuthProvider.isAuthenticated: ${authProvider.isAuthenticated}');
+
             final apiClient = previous ?? ApiClient();
 
             // Update token whenever AuthProvider changes
+            debugPrint('🔄 Calling apiClient.updateToken()...');
             apiClient.updateToken(authProvider.accessToken);
 
             // Set refresh token callbacks
@@ -108,12 +114,23 @@ class MyApp extends StatelessWidget {
         ),
 
         // Data providers
+        // CareerProvider depends on CareerService which depends on ApiClient
+        // Note: create uses temporary instance, update immediately replaces it with correct service
         ChangeNotifierProxyProvider<CareerService, CareerProvider>(
-          create: (context) => CareerProvider(
-            CareerService(ApiClient()),
-          ),
-          update: (_, service, previous) =>
-              previous ?? CareerProvider(service),
+          create: (_) {
+            debugPrint('🆕 Creating CareerProvider (temporary)...');
+            // This is just a placeholder, update() will be called immediately
+            return CareerProvider(CareerService(ApiClient()));
+          },
+          update: (_, service, previous) {
+            debugPrint('🔄 ProxyProvider<CareerProvider>: Updating...');
+            debugPrint('  Previous: ${previous != null ? 'exists' : 'null'}');
+            debugPrint('  Service provided: ${service != null}');
+
+            // IMPORTANT: Always create a new provider with the updated service
+            // This ensures we use the service with the correct ApiClient from ProxyProvider
+            return CareerProvider(service);
+          },
         ),
 
         ChangeNotifierProvider(

@@ -13,16 +13,10 @@ export const helmetConfig = helmet({
   },
 });
 
-const ALLOWED_ORIGINS = ["http://localhost:5173","http://192.168.101.5:5173"];
+const ALLOWED_ORIGINS = ["*"];
 
 export const corsConfig = cors({
-  origin: (origin, callback) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS policy: Origin ${origin} not allowed`));
-    }
-  },
+  origin: ALLOWED_ORIGINS,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: [
     "Content-Type",

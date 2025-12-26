@@ -5,7 +5,6 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_client.dart';
-import '../../providers/auth_provider.dart';
 
 /// Registration screen for new users
 class RegisterScreen extends StatefulWidget {
@@ -46,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final apiClient = context.read<ApiClient>();
       final authService = AuthService(apiClient);
 
-      final authResponse = await authService.register(
+      await authService.register(
         email: _emailController.text,
         password: _passwordController.text,
         firstName: _firstNameController.text,
@@ -55,32 +54,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      // Update ApiClient with the new token
-      apiClient.updateToken(authResponse.accessToken);
-
-      // Save auth data to provider
-      await context.read<AuthProvider>().setAuthData(
-            accessToken: authResponse.accessToken,
-            refreshToken: authResponse.refreshToken,
-            tokenType: authResponse.tokenType,
-            expiresIn: authResponse.expiresIn,
-            user: authResponse.user,
-            subscription: authResponse.subscription,
-            menu: authResponse.menu,
-          );
-
-      if (!mounted) return;
-
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registration successful!'),
+          content: Text('Registration successful! Please login to continue.'),
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
         ),
       );
 
-      // Navigate to home
-      context.go(AppRoutes.home);
+      // Navigate to login screen
+      context.go(AppRoutes.login);
     } catch (e) {
       if (!mounted) return;
 
