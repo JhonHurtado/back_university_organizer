@@ -34,7 +34,6 @@ export async function create(req: Request, res: Response) {
         message: "No autenticado",
       });
     }
-
     const data = createCareerSchema.parse(req.body);
     const career = await careerService.create(userId, data);
 

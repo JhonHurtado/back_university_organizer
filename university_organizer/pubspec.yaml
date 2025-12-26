@@ -46,6 +46,7 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.3.5
   flutter_secure_storage: ^10.0.0
+  sqflite: ^2.4.1
 
   # Navigation
   go_router: ^17.0.1
@@ -54,6 +55,7 @@ dependencies:
   equatable: ^2.0.7
   json_annotation: ^4.9.0
   intl: any
+  path: ^1.9.0
 
   # UI Enhancements
   flutter_svg: ^2.0.16

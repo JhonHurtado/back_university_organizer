@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
+import '../../widgets/modern_card.dart';
 
 /// Schedule weekly view screen showing weekly class schedule
 class ScheduleWeeklyView extends StatefulWidget {
@@ -170,64 +171,7 @@ class _ScheduleWeeklyViewState extends State<ScheduleWeeklyView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Schedule'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _calendarFormat == CalendarFormat.week
-                  ? Icons.calendar_view_month
-                  : Icons.calendar_view_week,
-            ),
-            onPressed: () {
-              setState(() {
-                _calendarFormat = _calendarFormat == CalendarFormat.week
-                    ? CalendarFormat.month
-                    : CalendarFormat.week;
-              });
-            },
-          ),
-          PopupMenuButton<String>(
-            itemBuilder: (context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'today',
-                child: Row(
-                  children: [
-                    Icon(Icons.today, size: 20),
-                    SizedBox(width: 12),
-                    Text('Go to Today'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'add',
-                child: Row(
-                  children: [
-                    Icon(Icons.add, size: 20),
-                    SizedBox(width: 12),
-                    Text('Add Schedule'),
-                  ],
-                ),
-              ),
-            ],
-            onSelected: (value) {
-              switch (value) {
-                case 'today':
-                  setState(() {
-                    _focusedDay = DateTime.now();
-                    _selectedDay = DateTime.now();
-                  });
-                  break;
-                case 'add':
-                  // TODO: Navigate to add schedule
-                  break;
-              }
-            },
-          ),
-        ],
-      ),
-      body: Column(
+    return Column(
         children: [
           // Calendar
           TableCalendar(
@@ -379,14 +323,7 @@ class _ScheduleWeeklyViewState extends State<ScheduleWeeklyView> {
                       ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add schedule
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
+      );
   }
 }
 
@@ -417,20 +354,81 @@ class _ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(color: color, width: 4),
+    return ModernCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      onTap: onTap,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left accent with time
+          Container(
+            width: 4,
+            height: 100,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color, color.withOpacity(0.5)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.circular(2),
             ),
-            borderRadius: BorderRadius.circular(12),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          const SizedBox(width: 16),
+
+          // Time column
+          Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [color, color.withOpacity(0.7)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      startTime,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: 20,
+                      height: 2,
+                      color: Colors.white.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      endTime,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+
+          // Content
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -444,7 +442,7 @@ class _ScheduleCard extends StatelessWidget {
                       ),
                       child: Icon(typeIcon, size: 20, color: color),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,8 +453,9 @@ class _ScheduleCard extends StatelessWidget {
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
                           Row(
                             children: [
                               Text(
@@ -469,18 +468,21 @@ class _ScheduleCard extends StatelessWidget {
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
+                                  horizontal: 8,
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
                                   color: color.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: color.withOpacity(0.3),
+                                  ),
                                 ),
                                 child: Text(
                                   type,
                                   style: TextStyle(
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.bold,
                                     color: color,
                                   ),
                                 ),
@@ -493,39 +495,30 @@ class _ScheduleCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Divider(height: 1),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 8),
-                    Text(
-                      '$startTime - $endTime',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    if (room != null) ...[
-                      Icon(Icons.room, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 8),
+                if (room != null)
+                  Row(
+                    children: [
+                      Icon(Icons.room, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           room!,
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w500,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
-                  ],
-                ),
+                  ),
                 if (building != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.business, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 8),
+                      Icon(Icons.business, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           building!,
@@ -533,6 +526,7 @@ class _ScheduleCard extends StatelessWidget {
                             fontSize: 12,
                             color: Colors.grey[600],
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -541,7 +535,7 @@ class _ScheduleCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

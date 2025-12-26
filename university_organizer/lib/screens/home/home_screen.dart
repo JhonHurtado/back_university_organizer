@@ -6,6 +6,10 @@ import '../../constants/app_routes.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/career_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/grade_provider.dart';
+import '../../providers/schedule_provider.dart';
+import '../../widgets/modern_card.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../careers/careers_list_screen.dart';
 import '../grades/grades_overview_screen.dart';
 import '../schedule/schedule_weekly_view.dart';
@@ -23,11 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
-    DashboardTab(),
-    CareersTab(),
-    GradesTab(),
-    ScheduleTab(),
-    ProfileTab(),
+    DashboardTab(),      // Inicio
+    ScheduleTab(),       // Horario
+    CareersTab(),        // Materias
+    GradesTab(),         // Notas
+    ProfileTab(),        // Perfil
   ];
 
   void _onItemTapped(int index) {
@@ -36,39 +40,106 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Consumer2<AuthProvider, NotificationProvider>(
+      builder: (context, authProvider, notificationProvider, child) {
+        return Scaffold(
+          appBar: CustomAppBar(
+            user: authProvider.currentUser,
+            unreadNotifications: notificationProvider.unreadCount,
+            onNotificationTap: () {
+              // TODO: Navigate to notifications
+            },
           ),
-          NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
-            label: 'Careers',
+          body: _screens[_selectedIndex],
+          bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF16161D) : Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: isDark ? const Color(0xFF2A2A35) : const Color(0xFFDEE2E6),
+              width: 1,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.grade_outlined),
-            selectedIcon: Icon(Icons.grade),
-            label: 'Grades',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined),
-            selectedIcon: Icon(Icons.calendar_today),
-            label: 'Schedule',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
+          backgroundColor: Colors.transparent,
+          indicatorColor: Colors.transparent,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: [
+            NavigationDestination(
+              icon: Icon(
+                Icons.home_outlined,
+                color: _selectedIndex == 0
+                    ? AppColors.primary
+                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+              ),
+              selectedIcon: Icon(
+                Icons.home,
+                color: AppColors.primary,
+              ),
+              label: 'Inicio',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.calendar_today_outlined,
+                color: _selectedIndex == 1
+                    ? AppColors.primary
+                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+              ),
+              selectedIcon: Icon(
+                Icons.calendar_today,
+                color: AppColors.primary,
+              ),
+              label: 'Horario',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.menu_book_outlined,
+                color: _selectedIndex == 2
+                    ? AppColors.primary
+                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+              ),
+              selectedIcon: Icon(
+                Icons.menu_book,
+                color: AppColors.primary,
+              ),
+              label: 'Materias',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.bar_chart_outlined,
+                color: _selectedIndex == 3
+                    ? AppColors.primary
+                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+              ),
+              selectedIcon: Icon(
+                Icons.bar_chart,
+                color: AppColors.primary,
+              ),
+              label: 'Notas',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.person_outline,
+                color: _selectedIndex == 4
+                    ? AppColors.primary
+                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+              ),
+              selectedIcon: Icon(
+                Icons.person,
+                color: AppColors.primary,
+              ),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
+        );
+      },
     );
   }
 }
@@ -93,167 +164,141 @@ class _DashboardTabState extends State<DashboardTab> {
       // Only load data if user is authenticated
       if (authProvider.isAuthenticated) {
         context.read<CareerProvider>().loadCareers();
-      }
+        context.read<NotificationProvider>().loadNotifications();
+        context.read<ScheduleProvider>().loadSchedules();
 
-      // Notifications can always load (mock data)
-      context.read<NotificationProvider>().loadNotifications();
+        // Load grades for the first active career if available
+        final careerProvider = context.read<CareerProvider>();
+        if (careerProvider.activeCareers.isNotEmpty) {
+          final careerId = careerProvider.activeCareers.first.id;
+          context.read<GradeProvider>().loadCareerGPA(careerId);
+        }
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          Consumer<NotificationProvider>(
-            builder: (context, notificationProvider, child) {
-              final unreadCount = notificationProvider.unreadCount;
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () => context.push(AppRoutes.notifications),
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.error,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          unreadCount > 99 ? '99+' : '$unreadCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer3<AuthProvider, CareerProvider, NotificationProvider>(
-        builder: (context, authProvider, careerProvider, notificationProvider, child) {
+    return Consumer5<AuthProvider, CareerProvider, NotificationProvider, GradeProvider, ScheduleProvider>(
+        builder: (context, authProvider, careerProvider, notificationProvider, gradeProvider, scheduleProvider, child) {
           final user = authProvider.currentUser;
           final activeCareersCount = careerProvider.activeCareers.length;
           final unreadNotifications = notificationProvider.unreadCount;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome Card
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome back${user != null ? ', ${user.fullName.split(' ').first}' : ''}!',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text('Here\'s your academic overview'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
+          // Get GPA from grade provider
+          final gpa = gradeProvider.gpaData?['gpa'] ?? 0.0;
+          final gpaStr = gpa > 0 ? gpa.toStringAsFixed(2) : '0.0';
 
-                // Quick Stats
+          // Get today's classes count from schedule provider
+          final todayClasses = scheduleProvider.getTodaySchedules();
+          final todayClassesCount = todayClasses.length;
+
+          return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                // Quick Stats - Modern Gradient Cards
                 Row(
                   children: [
                     Expanded(
-                      child: _StatCard(
+                      child: GradientStatCard(
                         title: 'Active Careers',
                         value: '$activeCareersCount',
                         icon: Icons.school,
-                        color: AppColors.primary,
+                        gradient: AppGradients.primary,
                         onTap: () {
-                          // Switch to Careers tab
-                          final homeState = context.findAncestorStateOfType<_HomeScreenState>();
-                          homeState?._onItemTapped(1);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatCard(
-                        title: 'Current GPA',
-                        value: '0.0',
-                        icon: Icons.grade,
-                        color: AppColors.success,
-                        onTap: () {
-                          // Switch to Grades tab
+                          // Switch to Materias tab
                           final homeState = context.findAncestorStateOfType<_HomeScreenState>();
                           homeState?._onItemTapped(2);
                         },
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
+                    const SizedBox(width: 16),
                     Expanded(
-                      child: _StatCard(
-                        title: 'Today Classes',
-                        value: '0',
-                        icon: Icons.calendar_today,
-                        color: AppColors.secondary,
+                      child: GradientStatCard(
+                        title: 'Current GPA',
+                        value: gpaStr,
+                        icon: Icons.grade,
+                        gradient: AppGradients.success,
                         onTap: () {
-                          // Switch to Schedule tab
+                          // Switch to Notas tab
                           final homeState = context.findAncestorStateOfType<_HomeScreenState>();
                           homeState?._onItemTapped(3);
                         },
                       ),
                     ),
-                    const SizedBox(width: 12),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
                     Expanded(
-                      child: _StatCard(
+                      child: GradientStatCard(
+                        title: 'Today Classes',
+                        value: '$todayClassesCount',
+                        icon: Icons.calendar_today,
+                        gradient: AppGradients.info,
+                        onTap: () {
+                          // Switch to Horario tab
+                          final homeState = context.findAncestorStateOfType<_HomeScreenState>();
+                          homeState?._onItemTapped(1);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: GradientStatCard(
                         title: 'Notifications',
                         value: '$unreadNotifications',
                         icon: Icons.notifications,
-                        color: AppColors.warning,
+                        gradient: AppGradients.warning,
                         onTap: () => context.push(AppRoutes.notifications),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
                 // Recent Activity
-                Text(
-                  'Recent Activity',
-                  style: Theme.of(context).textTheme.titleLarge,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Recent Activity',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    if (notificationProvider.notifications.isNotEmpty)
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.notifications),
+                        child: const Text('View All'),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 if (notificationProvider.notifications.isEmpty)
-                  const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(
+                  ModernCard(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
                         child: Column(
                           children: [
-                            Icon(Icons.inbox_outlined, size: 48, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text('No recent activity'),
+                            Icon(
+                              Icons.inbox_outlined,
+                              size: 64,
+                              color: Colors.grey[300],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No recent activity',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -261,30 +306,55 @@ class _DashboardTabState extends State<DashboardTab> {
                   )
                 else
                   ...notificationProvider.notifications.take(5).map(
-                        (notification) => Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            leading: Icon(
+                        (notification) => ModernListCard(
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: notification.isRead
+                                  ? Colors.grey.withOpacity(0.1)
+                                  : AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
                               notification.isRead
                                   ? Icons.notifications_outlined
                                   : Icons.notifications_active,
                               color: notification.isRead ? Colors.grey : AppColors.primary,
+                              size: 24,
                             ),
-                            title: Text(notification.title),
-                            subtitle: Text(notification.message),
-                            trailing: Text(
-                              _formatDate(notification.createdAt),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            onTap: () => context.push(AppRoutes.notifications),
                           ),
+                          title: notification.title,
+                          subtitle: notification.message,
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _formatDate(notification.createdAt),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey[600],
+                                    ),
+                              ),
+                              if (!notification.isRead) ...[
+                                const SizedBox(height: 4),
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          onTap: () => context.push(AppRoutes.notifications),
                         ),
                       ),
-              ],
-            ),
+                    ],
+                  ),
           );
         },
-      ),
     );
   }
 
@@ -305,58 +375,6 @@ class _DashboardTabState extends State<DashboardTab> {
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(icon, color: color, size: 32),
-                  Text(
-                    value,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: color,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

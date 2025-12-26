@@ -4,6 +4,7 @@ import '../../constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/career_provider.dart';
 import '../../models/career.dart';
+import '../../widgets/modern_card.dart';
 import 'create_career_screen.dart';
 
 /// Careers list screen
@@ -31,19 +32,7 @@ class _CareersListScreenState extends State<CareersListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Careers'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<CareerProvider>().refresh();
-            },
-          ),
-        ],
-      ),
-      body: Consumer<CareerProvider>(
+    return Consumer<CareerProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
             return const Center(
@@ -79,31 +68,53 @@ class _CareersListScreenState extends State<CareersListScreen> {
 
           if (!provider.hasCareers) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.school_outlined,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No careers yet',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Create your first career to get started',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => _navigateToCreateCareer(context),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Create Career'),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        gradient: AppGradients.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.school_outlined,
+                        size: 64,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'No careers yet',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Create your first career to get started\nand track your academic journey',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    FilledButton.icon(
+                      onPressed: () => _navigateToCreateCareer(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Create Career'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -120,12 +131,7 @@ class _CareersListScreenState extends State<CareersListScreen> {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToCreateCareer(context),
-        child: const Icon(Icons.add),
-      ),
-    );
+      );
   }
 
   void _navigateToCreateCareer(BuildContext context) {
@@ -142,120 +148,198 @@ class _CareerCard extends StatelessWidget {
 
   const _CareerCard({required this.career});
 
+  Color get _careerColor {
+    try {
+      return Color(int.parse(career.color!.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      return AppColors.primary;
+    }
+  }
+
+  LinearGradient get _cardGradient {
+    return LinearGradient(
+      colors: [
+        _careerColor.withOpacity(0.05),
+        _careerColor.withOpacity(0.02),
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          // TODO: Navigate to career detail
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return ModernCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      onTap: () {
+        // TODO: Navigate to career detail
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with career name and status
+          Row(
             children: [
-              Row(
-                children: [
-                  // Color indicator
-                  Container(
-                    width: 4,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Color(
-                        int.parse(career.color!.replaceFirst('#', '0xFF')),
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+              // Color indicator circle
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [_careerColor, _careerColor.withOpacity(0.7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(width: 12),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _careerColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.school,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
 
-                  // Career info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              // Career info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      career.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
                       children: [
-                        Text(
-                          career.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                        Icon(
+                          Icons.location_city,
+                          size: 14,
+                          color: Colors.grey[600],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            career.university,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Status badge
+              _StatusBadge(status: career.status),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Progress section with modern design
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: _cardGradient,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timeline,
+                          size: 16,
+                          color: _careerColor,
+                        ),
+                        const SizedBox(width: 6),
                         Text(
-                          career.university,
+                          'Semester ${career.currentSemester} of ${career.totalSemesters}',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondaryLight,
+                                fontWeight: FontWeight.w600,
+                                color: _careerColor,
                               ),
                         ),
                       ],
                     ),
-                  ),
-
-                  // Status badge
-                  _StatusBadge(status: career.status),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Progress bar
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Semester ${career.currentSemester} of ${career.totalSemesters}',
-                        style: Theme.of(context).textTheme.bodySmall,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
                       ),
-                      Text(
+                      decoration: BoxDecoration(
+                        color: _careerColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
                         '${career.progressPercentage.toStringAsFixed(0)}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  LinearProgressIndicator(
-                    value: career.progressPercentage / 100,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(
-                        int.parse(career.color!.replaceFirst('#', '0xFF')),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Additional info
-              Row(
-                children: [
-                  _InfoChip(
-                    icon: Icons.credit_card,
-                    label: '${career.totalCredits} credits',
-                  ),
-                  const SizedBox(width: 8),
-                  _InfoChip(
-                    icon: Icons.grade,
-                    label: career.gradeScaleDisplayName,
-                  ),
-                  if (career.faculty != null) ...[
-                    const SizedBox(width: 8),
-                    _InfoChip(
-                      icon: Icons.business,
-                      label: career.faculty!,
                     ),
                   ],
-                ],
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: career.progressPercentage / 100,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(_careerColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Additional info chips
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _ModernInfoChip(
+                icon: Icons.credit_card,
+                label: '${career.totalCredits} credits',
+                color: AppColors.primary,
               ),
+              _ModernInfoChip(
+                icon: Icons.grade,
+                label: career.gradeScaleDisplayName,
+                color: AppColors.success,
+              ),
+              if (career.faculty != null)
+                _ModernInfoChip(
+                  icon: Icons.business,
+                  label: career.faculty!,
+                  color: AppColors.secondary,
+                ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -312,37 +396,44 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-class _InfoChip extends StatelessWidget {
+class _ModernInfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
 
-  const _InfoChip({
+  const _ModernInfoChip({
     required this.icon,
     required this.label,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariantLight,
-        borderRadius: BorderRadius.circular(4),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
-            size: 14,
-            color: AppColors.textSecondaryLight,
+            size: 16,
+            color: color,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondaryLight,
+              fontSize: 13,
+              color: color,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

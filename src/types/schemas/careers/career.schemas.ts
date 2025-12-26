@@ -27,46 +27,62 @@ export const CareerStatusSchema = z.enum([
 // =====================================================
 export const createCareerSchema = z.object({
   name: z
-    .string()
+    .string({
+      message: "El nombre de la carrera es obligatorio",
+    })
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(200, "El nombre no puede exceder 200 caracteres"),
 
   code: z
-    .string()
+    .string({
+      message: "El código de la carrera es obligatorio",
+    })
     .max(50, "El código no puede exceder 50 caracteres")
     .optional()
     .nullable(),
 
   university: z
-    .string()
+    .string({
+      message: "El nombre de la universidad es obligatorio",
+    })
     .min(2, "El nombre de la universidad debe tener al menos 2 caracteres")
     .max(200, "El nombre de la universidad no puede exceder 200 caracteres"),
 
   faculty: z
-    .string()
+    .string({
+      message: "El nombre de la facultad es obligatorio",
+    })
     .max(200, "El nombre de la facultad no puede exceder 200 caracteres")
     .optional()
     .nullable(),
 
   campus: z
-    .string()
+    .string({
+      message: "El nombre del campus es obligatorio",
+    })
     .max(200, "El nombre del campus no puede exceder 200 caracteres")
     .optional()
     .nullable(),
 
   totalCredits: z
-    .number()
+    .number({
+      message: "El total de créditos es obligatorio",
+    })
     .int("El total de créditos debe ser un número entero")
     .positive("El total de créditos debe ser mayor a 0"),
 
   totalSemesters: z
-    .number()
+    .number({
+      message: "El total de semestres es obligatorio",
+    })
     .int("El total de semestres debe ser un número entero")
     .positive("El total de semestres debe ser mayor a 0")
     .max(20, "El total de semestres no puede exceder 20"),
 
   currentSemester: z
-    .number()
+    .number({
+      message: "El semestre actual es obligatorio",
+    })
     .int("El semestre actual debe ser un número entero")
     .positive("El semestre actual debe ser mayor a 0")
     .default(1),
@@ -74,31 +90,34 @@ export const createCareerSchema = z.object({
   gradeScale: GradeScaleSchema.default("FIVE"),
 
   minPassingGrade: z
-    .number()
+    .number({
+      message: "La nota mínima de aprobación es obligatoria",
+    })
     .positive("La nota mínima de aprobación debe ser mayor a 0")
     .default(3.0),
 
   maxGrade: z
-    .number()
+    .number({
+      message: "La nota máxima es obligatoria",
+    })
     .positive("La nota máxima debe ser mayor a 0")
     .default(5.0),
 
-  startDate: z
-    .string()
-    .datetime("Fecha de inicio inválida")
-    .or(z.date())
-    .transform((val) => (typeof val === "string" ? new Date(val) : val)),
+  startDate: z.coerce.date({
+    message: "La fecha de inicio es obligatoria",
+  }),
 
-  expectedEndDate: z
-    .string()
-    .datetime("Fecha de finalización esperada inválida")
-    .or(z.date())
-    .transform((val) => (typeof val === "string" ? new Date(val) : val))
+  expectedEndDate: z.coerce
+    .date({
+      message: "La fecha de finalización esperada es obligatoria",
+    })
     .optional()
     .nullable(),
 
   color: z
-    .string()
+    .string({
+      message: "El color es obligatorio",
+    })
     .regex(/^#[0-9A-F]{6}$/i, "Color debe ser un código hexadecimal válido")
     .default("#3B82F6")
     .optional(),
@@ -166,10 +185,7 @@ export const updateCareerSchema = z.object({
     .positive("La nota mínima de aprobación debe ser mayor a 0")
     .optional(),
 
-  maxGrade: z
-    .number()
-    .positive("La nota máxima debe ser mayor a 0")
-    .optional(),
+  maxGrade: z.number().positive("La nota máxima debe ser mayor a 0").optional(),
 
   startDate: z
     .string()

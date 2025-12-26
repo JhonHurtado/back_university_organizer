@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../models/career.dart';
+import '../../widgets/modern_card.dart';
 
 /// Career detail screen showing complete information about a career
 class CareerDetailScreen extends StatefulWidget {
@@ -355,39 +356,36 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
                 children: [
                   const _SectionTitle(title: 'GENERAL INFORMATION'),
                   const SizedBox(height: 12),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
+                  ModernCard(
+                    child: Column(
+                      children: [
+                        _InfoRow(
+                          icon: Icons.school,
+                          label: 'Faculty',
+                          value: career.faculty ?? 'Not specified',
+                        ),
+                        const Divider(height: 24),
+                        _InfoRow(
+                          icon: Icons.location_on,
+                          label: 'Campus',
+                          value: career.campus ?? 'Not specified',
+                        ),
+                        const Divider(height: 24),
+                        if (career.startDate != null)
                           _InfoRow(
-                            icon: Icons.school,
-                            label: 'Faculty',
-                            value: career.faculty ?? 'Not specified',
+                            icon: Icons.event,
+                            label: 'Start Date',
+                            value: DateFormat('MMM dd, yyyy').format(career.startDate!),
                           ),
+                        if (career.expectedEndDate != null) ...[
                           const Divider(height: 24),
                           _InfoRow(
-                            icon: Icons.location_on,
-                            label: 'Campus',
-                            value: career.campus ?? 'Not specified',
+                            icon: Icons.event_available,
+                            label: 'Expected End',
+                            value: DateFormat('MMM dd, yyyy').format(career.expectedEndDate!),
                           ),
-                          const Divider(height: 24),
-                          if (career.startDate != null)
-                            _InfoRow(
-                              icon: Icons.event,
-                              label: 'Start Date',
-                              value: DateFormat('MMM dd, yyyy').format(career.startDate!),
-                            ),
-                          if (career.expectedEndDate != null) ...[
-                            const Divider(height: 24),
-                            _InfoRow(
-                              icon: Icons.event_available,
-                              label: 'Expected End',
-                              value: DateFormat('MMM dd, yyyy').format(career.expectedEndDate!),
-                            ),
-                          ],
                         ],
-                      ),
+                      ],
                     ),
                   ),
 
@@ -396,42 +394,39 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
                   // Academic Information
                   const _SectionTitle(title: 'ACADEMIC INFORMATION'),
                   const SizedBox(height: 12),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _InfoRow(
-                            icon: Icons.format_list_numbered,
-                            label: 'Total Semesters',
-                            value: '${career.totalSemesters}',
-                          ),
-                          const Divider(height: 24),
-                          _InfoRow(
-                            icon: Icons.filter_none,
-                            label: 'Current Semester',
-                            value: '${career.currentSemester}',
-                          ),
-                          const Divider(height: 24),
-                          _InfoRow(
-                            icon: Icons.stars,
-                            label: 'Total Credits',
-                            value: '${career.totalCredits}',
-                          ),
-                          const Divider(height: 24),
-                          _InfoRow(
-                            icon: Icons.straighten,
-                            label: 'Grade Scale',
-                            value: career.gradeScaleDisplayName,
-                          ),
-                          const Divider(height: 24),
-                          _InfoRow(
-                            icon: Icons.check_circle,
-                            label: 'Passing Grade',
-                            value: '${career.minPassingGrade} / ${career.maxGrade}',
-                          ),
-                        ],
-                      ),
+                  ModernCard(
+                    child: Column(
+                      children: [
+                        _InfoRow(
+                          icon: Icons.format_list_numbered,
+                          label: 'Total Semesters',
+                          value: '${career.totalSemesters}',
+                        ),
+                        const Divider(height: 24),
+                        _InfoRow(
+                          icon: Icons.filter_none,
+                          label: 'Current Semester',
+                          value: '${career.currentSemester}',
+                        ),
+                        const Divider(height: 24),
+                        _InfoRow(
+                          icon: Icons.stars,
+                          label: 'Total Credits',
+                          value: '${career.totalCredits}',
+                        ),
+                        const Divider(height: 24),
+                        _InfoRow(
+                          icon: Icons.straighten,
+                          label: 'Grade Scale',
+                          value: career.gradeScaleDisplayName,
+                        ),
+                        const Divider(height: 24),
+                        _InfoRow(
+                          icon: Icons.check_circle,
+                          label: 'Passing Grade',
+                          value: '${career.minPassingGrade} / ${career.maxGrade}',
+                        ),
+                      ],
                     ),
                   ),
 
@@ -443,28 +438,26 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
+                        child: GradientStatCard(
+                          title: 'View Subjects',
+                          value: '',
+                          icon: Icons.book,
+                          gradient: AppGradients.purple,
+                          onTap: () {
                             context.push('/careers/${widget.careerId}/subjects');
                           },
-                          icon: const Icon(Icons.book),
-                          label: const Text('View Subjects'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
+                        child: GradientStatCard(
+                          title: 'Statistics',
+                          value: '',
+                          icon: Icons.analytics,
+                          gradient: AppGradients.info,
+                          onTap: () {
                             context.push('/careers/${widget.careerId}/statistics');
                           },
-                          icon: const Icon(Icons.analytics),
-                          label: const Text('Statistics'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
                         ),
                       ),
                     ],
